@@ -1,0 +1,5452 @@
+{
+  "openapi" : "3.0.0",
+  "info" : {
+    "title" : "Wild Apricot API for non-administrative access",
+    "description" : "Wild Apricot API for non-administrative access",
+    "version" : "8.10.0"
+  },
+  "servers" : [ {
+    "url" : "https://api.wildapricot.org/publicview/v1"
+  } ],
+  "security" : [ {
+    "OAuth2_autorizationCode" : [ ]
+  }, {
+    "OAuth2_password" : [ ]
+  } ],
+  "paths" : {
+    "/" : {
+      "get" : {
+        "summary" : "Base URL for this API.",
+        "description" : "Base URL for this API. It provides a list of resources,\nwhich can be directly accessed by URL without providing any additional\ninformation like account ID etc.\n",
+        "responses" : {
+          "200" : {
+            "description" : "Array of resources",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Resource"
+                  },
+                  "x-content-type" : "application/json"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Resource"
+                  }
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          }
+        }
+      }
+    },
+    "/accounts" : {
+      "get" : {
+        "tags" : [ "Accounts" ],
+        "summary" : "List of available accounts",
+        "description" : "List of accounts available with current oAuth token. Typically, there would be only one record in an array.\n",
+        "responses" : {
+          "200" : {
+            "description" : "Array of accounts",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Account"
+                  },
+                  "x-content-type" : "application/json"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Account"
+                  }
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}" : {
+      "get" : {
+        "tags" : [ "Accounts" ],
+        "summary" : "Details for specific account",
+        "description" : "Details for specific account\n",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Array of accounts",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Account"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Account"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/contacts" : {
+      "get" : {
+        "tags" : [ "Contacts" ],
+        "summary" : "Contacts list",
+        "description" : "\nRetrieves or updates contact information. Results can be filtered using filter criteria consisting of fields, operators, and values.\nLarge lists can be retrieved with in sets or pages using $top and $skip parameters.\n",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Current account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        }, {
+          "name" : "simpleQuery",
+          "in" : "query",
+          "description" : "A search string used to filter contacts list.",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "$filter",
+          "in" : "query",
+          "description" : "An expression to filter contacts. Possible field names to filter contacts are\n**Id** - A list of contact IDs. Supports operation **in**. E.g. `$filter=Id in [1,3,5,7,9]`\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "$select",
+          "in" : "query",
+          "description" : "Fields to be returned for each contact. If not specified, no custom fields will be returned.\nThe field names correspond to the fields returned by the [ContactFields API call](#/Contacts/get_accounts__accountId__contactfields), not the field names that appear in Wild Apricot. Multiple field names are separated by commas, and field names with spaces or special characters are enclosed in single quotation marks.\nExample `$select='First name','Last name','My favorite book'`\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "$skip",
+          "in" : "query",
+          "description" : "This parameter specifies the number of records to be skipped. For example, if the result set contains 200 records and $skip=50, then the call will return records 51 to 150.\n\nUsually used together with **$top** parameter.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        }, {
+          "name" : "$top",
+          "in" : "query",
+          "description" : "Specifies the maximum number of records to be returned. For example, if the result set contains 100 records and $top=50, then the call will return records from 1 to 50. If omitted or set more than 100 then maximum 100 items returned\nUsually this parameter used together with $skip parameter.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        }, {
+          "name" : "$count",
+          "in" : "query",
+          "description" : "Append this parameter to a search request to retrieve the number of contacts returned by the search.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "name" : "ids",
+          "in" : "query",
+          "description" : "Retrieve specific contacts.\n\nE.g. `ids=1,2,3`\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "idsOnly",
+          "in" : "query",
+          "description" : "If specified, the call returns a list of contact IDs for the filtered contacts. In this case, the response will contain only the ContactIdentifiers field.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A wrapper object, which contains a list of contacts, or the number of contacts, or a list of contact IDs.\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ContactsResponse"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ContactsResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "On invalid parameters. See error details in response body.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/contacts/me" : {
+      "get" : {
+        "tags" : [ "Contacts" ],
+        "summary" : "Retrieve information about the current user",
+        "description" : "Retrieve information about the current user. FieldValues would not be returned in a result.\n",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        }, {
+          "name" : "includeDetails",
+          "in" : "query",
+          "description" : "Append this parameter to a search request to retrieve additional information for current user, including FieldValues.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The current user information has been updated\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ContactMe"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ContactMe"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Contacts" ],
+        "summary" : "Update the current user information",
+        "description" : "Update the current user information. Pass the fieldValues those need to be changed.\n",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Contact"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Brief information about the current user\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Contact"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Contact"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/contacts/{contactId}" : {
+      "get" : {
+        "tags" : [ "Contacts" ],
+        "summary" : "Retrieve information about specific member or contact",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        }, {
+          "name" : "contactId",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Detailed information about requested contact. Field values will be provided with respect to current user permissions and privacy settings.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Contact"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Contact"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "On invalid parameters. See error details in response body.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "404" : {
+            "description" : "Requested item not found."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/contactfields" : {
+      "get" : {
+        "tags" : [ "Contacts" ],
+        "summary" : "Detailed list of the common and membership fields.  If a field is not set to be visible to everyone, then the field  will not be included in the results.\n",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        }, {
+          "name" : "showSectionDividers",
+          "in" : "query",
+          "description" : "Specifies whether section dividers should be included in the response.\nDefault value is false.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Array of common and membership field descriptions",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ContactField"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ContactField"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "On invalid parameters. See error details in response body.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/attachments/{attachmentId}" : {
+      "get" : {
+        "tags" : [ "Attachments" ],
+        "summary" : "Download attachment",
+        "description" : "Attachment, available for specific account.",
+        "operationId" : "GetAttachmentContent",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        }, {
+          "name" : "attachmentId",
+          "in" : "path",
+          "description" : "Attachment identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "Original", "Small", "Medium", "Medium1", "Large" ]
+          }
+        }, {
+          "name" : "fieldSystemCode",
+          "in" : "query",
+          "description" : "SystemCode of attachement field which the attachment belongs to.",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "contactId",
+          "in" : "query",
+          "description" : "ID of contact which the attachment belongs to.",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "eventRegistrationId",
+          "in" : "query",
+          "description" : "ID of event registration which the attachment belongs to.",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "asBase64",
+          "in" : "query",
+          "description" : "Base64 encoded image will be returned.",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Response is common HttpResponseMessage with content set to attachment binary data.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "binary",
+                  "x-content-type" : "application/json"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "binary"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "On invalid parameters. See error details in response body.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "404" : {
+            "description" : "Requested item not found."
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/attachments/GetInfos" : {
+      "get" : {
+        "tags" : [ "Attachments" ],
+        "summary" : "Get attachments infos belongs to a field value",
+        "description" : "Attachment infos, available for specific account.",
+        "operationId" : "GetAttachmentInfos",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        }, {
+          "name" : "fieldSystemCode",
+          "in" : "query",
+          "description" : "SystemCode of attachement field which the attachment belongs to.",
+          "required" : true,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "contactId",
+          "in" : "query",
+          "description" : "ID of contact which the attachment belongs to.",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "eventRegistrationId",
+          "in" : "query",
+          "description" : "ID of event registration which the attachment belongs to.",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of attachment descriptions",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/FileInfo"
+                  },
+                  "x-content-type" : "application/json"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/FileInfo"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "On invalid parameters. See error details in response body.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "404" : {
+            "description" : "Requested item not found."
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/attachments/Upload" : {
+      "post" : {
+        "tags" : [ "Attachments" ],
+        "summary" : "Upload attachments",
+        "description" : "Upload attachments data and get their identifiers to use for contact values.  Attachment not used for any Contact field value will be deleted in 30 minutes.\n",
+        "operationId" : "UploadAttachments",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AttachmentDataList"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "An array of attachment descriptions",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/FileInfo"
+                  },
+                  "x-content-type" : "application/json"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/FileInfo"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "On invalid parameters. See error details in response body.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/membershiplevels" : {
+      "get" : {
+        "tags" : [ "Contacts" ],
+        "summary" : "List of membership levels visible to the current user.",
+        "description" : "---\n",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Array of level descriptions",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MembershipLevel"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MembershipLevel"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/events" : {
+      "get" : {
+        "tags" : [ "Events" ],
+        "summary" : "Retrieve list of events visible to the current user.",
+        "description" : "Retrieve list of events visible to the current user.",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        }, {
+          "name" : "$filter",
+          "in" : "query",
+          "description" : "An expression to filter events. Possible field names to filter events are\n\n**Id** - A list of event IDs. Supports operation **in**. E.g. `$filter=Id in [1,3,5,7,9]`\n\n**RegistrationEnabled** - Indicates whether registration has been enabled for the event. Supports operations **eq** and **ne**. E.g. `RegistrationEnabled eq true`\n\n**IsUpcoming** - Indicates whether the event has yet to take place. Supports operations **eq** and **ne**. E.g. `IsUpcoming eq false`\n\n**StartDate** - The start date of the event (using the yyyy-mm-dd date format). Supports operations **eq**, **ne**, **gt**, **ge**, **lt**, **le**. E.g. `StartDate gt 2016-01-02`\n\n**EndDate** - The end date of the event (using  the  yyyy-mm-dd date format). Supports operations **eq**, **ne**, **gt**, **ge**, **lt**, **le**. E.g. `EndDate le 2016-01-02`\n\n**TextIndex** - Returns events that contain the specified string within the event title, description, location, start date, or event tag. Supports operation **substringof**. E.g. `$filter=substringof(TextIndex,'some text to look for')`\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "$skip",
+          "in" : "query",
+          "description" : "This parameter specifies the number of records to be skipped. For example, if the result set contains 100 records and $skip=50, then the call will return records 51 to 150.\n\nUsually used together with **$top** parameter.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        }, {
+          "name" : "$top",
+          "in" : "query",
+          "description" : "Specifies the maximum number of records to be returned. For example, if the result set contains 100 records and $top=50, then the call will return records from 1 to 50. If omitted or set more than 100 then maximum 100 items returned.\nUsually this parameter used together with $skip parameter.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        }, {
+          "name" : "$count",
+          "in" : "query",
+          "description" : "Append this parameter to a search request to retrieve the number of items.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "name" : "idsOnly",
+          "in" : "query",
+          "description" : "If specified, the call returns a list of event IDs for the filtered events. In this case, the response will contain only the EventsIdentifiers field.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Returns list of filtered events",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EventsResponse"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EventsResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "On invalid parameters. See error details in response body.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/events/{eventId}" : {
+      "get" : {
+        "tags" : [ "Events" ],
+        "summary" : "Retrieve details for specific event",
+        "description" : "Retrieve details for specific event",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        }, {
+          "name" : "eventId",
+          "in" : "path",
+          "description" : "Unique event identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Returns list of filtered events",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Event"
+                  },
+                  "x-content-type" : "application/json"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Event"
+                  }
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "404" : {
+            "description" : "Requested item not found."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/eventregistrations" : {
+      "get" : {
+        "tags" : [ "Event registrations" ],
+        "summary" : "Retrieve list of event registrations for current contact.",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        }, {
+          "name" : "eventId",
+          "in" : "query",
+          "description" : "ID of event to retrieve registrations for",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        }, {
+          "name" : "parentRegistrationId",
+          "in" : "query",
+          "description" : "ID of event registration to retrieve dependant registrations for",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Returns list of event registrations for current contact.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/EventRegistration"
+                  },
+                  "x-content-type" : "application/json"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/EventRegistration"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "On invalid parameters. See error details in response body.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Event registrations" ],
+        "summary" : "Create new event registration",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/EventRegistrationParams"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "ID of new event registration",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "integer",
+                  "x-content-type" : "application/json"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "type" : "integer"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "On invalid parameters. See error details in response body.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/eventregistrations/{Id}" : {
+      "get" : {
+        "tags" : [ "Event registrations" ],
+        "summary" : "Retrieve details for specific event registration.",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        }, {
+          "name" : "Id",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Retrieve details for specific event registration.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EventRegistration"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EventRegistration"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "404" : {
+            "description" : "Requested item not found."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Event registrations" ],
+        "summary" : "Delete own event registration or wait list item.",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        }, {
+          "name" : "Id",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Retrieve details for specific event registration.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EventRegistration"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EventRegistration"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "404" : {
+            "description" : "Requested item not found."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/EventAttendees" : {
+      "get" : {
+        "tags" : [ "Event registrations" ],
+        "summary" : "Retrieve list of public event registration infos (if enabled).",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        }, {
+          "name" : "eventId",
+          "in" : "query",
+          "description" : "ID of event to retrieve registrations for",
+          "required" : true,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        }, {
+          "name" : "simpleQuery",
+          "in" : "query",
+          "description" : "A search string used to filter contacts list.",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "$skip",
+          "in" : "query",
+          "description" : "This parameter specifies the number of records to be skipped. For example, if the result set contains 200 records and $skip=50, then the call will return records 51 to 200.\n\nUsually used together with **$top** parameter.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        }, {
+          "name" : "$top",
+          "in" : "query",
+          "description" : "Specifies the maximum number of records to be returned. For example, if the result set contains 100 records and $top=50, then the call will return records from 1 to 50. If omitted or set more than 100 then maximum 100 items returned.\nUsually this parameter used together with $skip parameter.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        }, {
+          "name" : "$count",
+          "in" : "query",
+          "description" : "Append this parameter to a search request to retrieve the number of items returned by the search.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "name" : "ids",
+          "in" : "query",
+          "description" : "Retrieve specific event registrations (if allowed).\n\nE.g. `ids=1,2,3`\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "idsOnly",
+          "in" : "query",
+          "description" : "If specified, the call returns a list of event registration IDs. In this case, the response will contain only the Identifiers field.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Returns list of public event registration infos.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EventAttendeesResponse"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EventAttendeesResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "On invalid parameters. See error details in response body.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/rpc/{accountId}/CalculateEventRegistrationCosts" : {
+      "post" : {
+        "tags" : [ "Event registrations" ],
+        "summary" : "Generate possible invoice for event registration",
+        "description" : "---",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "The same parameters as for creating new Event Registration",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/EventRegistrationParams"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Indicates whether message was accepted",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Invoice"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Invoice"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "On invalid parameters. See error details in response body.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/rpc/{accountId}/IsEventRegistrationCancellationAllowed" : {
+      "get" : {
+        "tags" : [ "Event registrations" ],
+        "summary" : "Indicates whether the registration can be canceled by the registrant",
+        "description" : "---",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        }, {
+          "name" : "registrationId",
+          "in" : "query",
+          "description" : "Event registration identifier",
+          "required" : true,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "---",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "boolean",
+                  "x-content-type" : "application/json"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "type" : "boolean"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "On invalid parameters. See error details in response body.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/rpc/{accountId}/CancelEventRegistration" : {
+      "post" : {
+        "tags" : [ "Event registrations" ],
+        "summary" : "Cancels event registration",
+        "description" : "---",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "integer"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Indicates that the registration was successfully canceled",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "boolean",
+                  "x-content-type" : "application/json"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "type" : "boolean"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "On invalid parameters. See error details in response body.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "404" : {
+            "description" : "Requested item not found."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/rpc/{accountId}/verifyEventRegistrationCode" : {
+      "post" : {
+        "tags" : [ "Events" ],
+        "summary" : "Indicates whether the registration code is valid",
+        "description" : "---",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/VerifyRegistrationCodeParams"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Indicates whether the registration code is valid for this event and registration type",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "boolean",
+                  "x-content-type" : "application/json"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "type" : "boolean"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/invoices" : {
+      "get" : {
+        "tags" : [ "Invoices" ],
+        "summary" : "Retrieve list of invoices for the current contact.",
+        "description" : "Retrieve list of invoices associated with the current contact.",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        }, {
+          "name" : "openBalanceOnly",
+          "in" : "query",
+          "description" : "Return only invoices with an open balance",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "name" : "eventRegistrationId",
+          "in" : "query",
+          "description" : "Return only those invoices related to specific event registration ID",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        }, {
+          "name" : "$skip",
+          "in" : "query",
+          "description" : "This parameter specifies the number of records to be skipped. For example, if the result set contains 200 records and $skip=50, then the call will return records 51 to 200.\n\nUsually used together with **$top** parameter.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        }, {
+          "name" : "$top",
+          "in" : "query",
+          "description" : "Specifies the maximum number of records to be returned. For example, if the result set contains 100 records and $top=50, then the call will return records from 1 to 50. If omitted or set more than 100 then maximum 100 items returned.\nUsually this parameter used together with $skip parameter.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        }, {
+          "name" : "$count",
+          "in" : "query",
+          "description" : "Append this parameter to a search request to retrieve the number of items returned by the search.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "name" : "ids",
+          "in" : "query",
+          "description" : "Retrieve specific records (if allowed).\n\nE.g. `ids=1,2,3`\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "idsOnly",
+          "in" : "query",
+          "description" : "If specified, the call returns a list of record IDs. In this case, the response will contain only the Identifiers field.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Returns list of filtered invoices",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Invoice"
+                  },
+                  "x-content-type" : "application/json"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Invoice"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "On invalid parameters. See error details in response body.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/payments" : {
+      "get" : {
+        "tags" : [ "Payments" ],
+        "summary" : "Retrieve list of payments for the current contact.",
+        "description" : "Retrieve list of payments made by the current contact.",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        }, {
+          "name" : "$skip",
+          "in" : "query",
+          "description" : "This parameter specifies the number of records to be skipped. For example, if the result set contains 100 records and $skip=50, then the call will return records 51 to 100. Usually used together with **$top** parameter.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        }, {
+          "name" : "$top",
+          "in" : "query",
+          "description" : "Specifies the maximum number of records to be returned. For example, if the result set contains 100 records and $top=50, then the call will return records from 1 to 50.\n\nUsually this parameter used together with $skip parameter.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        }, {
+          "name" : "$count",
+          "in" : "query",
+          "description" : "Append this parameter to a search request to retrieve the number of payments returned by the search.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "name" : "idsOnly",
+          "in" : "query",
+          "description" : "If specified, the call returns a list of payment IDs for the filtered payments. In this case, the response will contain only the PaymentIdentifiers field.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Returns list of payments",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Payment"
+                  },
+                  "x-content-type" : "application/json"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Payment"
+                  }
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/rpc/{accountId}/acceptTermsOfUse" : {
+      "post" : {
+        "tags" : [ "Contacts" ],
+        "summary" : "Accepts terms of use.",
+        "description" : "Accepts terms of use for the currently loged in user. Does nothing if terms have been accepted already.\n",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          }
+        }
+      }
+    },
+    "/rpc/{accountId}/getAllowedPaymentMethodTypes" : {
+      "post" : {
+        "tags" : [ "Payments" ],
+        "summary" : "Retrieve allowed online payment methods",
+        "description" : "Retrieve allowed online payment methods",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "List of available payment methods and method descriptions",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/PaymentMethodTypeDescription"
+                  },
+                  "x-content-type" : "application/json"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/PaymentMethodTypeDescription"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "On invalid parameters. See error details in response body.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/rpc/{accountId}/startPayment" : {
+      "post" : {
+        "tags" : [ "Payments" ],
+        "summary" : "Start payment procedure",
+        "description" : "Start payment procedure for specific invoice(s)",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/StartPaymentParams"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Redirect URL to payment processor page, where user can enter credit card info and proceed with payment",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PaymentTrackingInfo"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PaymentTrackingInfo"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "On invalid parameters. See error details in response body.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/rpc/{accountId}/checkPaymentStatus" : {
+      "post" : {
+        "tags" : [ "Payments" ],
+        "summary" : "Check status of credit card payment",
+        "description" : "Check the status of the credit card payment",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "Tracking ID of payment transaction, returned from rpc/{accountId}/startPayment",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Returns current payment status",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PaymentStatus"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PaymentStatus"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "On invalid parameters. See error details in response body.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/rpc/{accountId}/applyForMembership" : {
+      "post" : {
+        "tags" : [ "Membership" ],
+        "summary" : "Initiates a membership application",
+        "description" : "---",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "Parameters of membership application",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MembershipApplication"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Result of membership application - new level, new status, invoice to pay if any",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MembershipApplicationResult"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MembershipApplicationResult"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "On invalid parameters. See error details in response body.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/rpc/{accountId}/CalculateRenewalCosts" : {
+      "post" : {
+        "tags" : [ "Membership" ],
+        "summary" : "Generate possible invoice for membership renewal",
+        "description" : "---",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "$ref" : "#/components/requestBodies/RenewParameters"
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Result of membership renewal - invoice to pay if any, next renewal date",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CalculateRenewalResult"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CalculateRenewalResult"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "On invalid parameters. See error details in response body.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/rpc/{accountId}/ApplyForRenewal" : {
+      "post" : {
+        "tags" : [ "Membership" ],
+        "summary" : "Initiates a membership renewal",
+        "description" : "---",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "$ref" : "#/components/requestBodies/RenewParameters"
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Result of membership renewal - invoice to pay if any"
+          },
+          "400" : {
+            "description" : "On invalid parameters. See error details in response body.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/rpc/{accountId}/CancelRenewal" : {
+      "post" : {
+        "tags" : [ "Membership" ],
+        "summary" : "Cancels a membership renewal",
+        "description" : "---",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Result of membership renewal - invoice to pay if any"
+          },
+          "400" : {
+            "description" : "On invalid parameters. See error details in response body.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/rpc/{accountId}/sendMessage" : {
+      "post" : {
+        "tags" : [ "Messaging" ],
+        "summary" : "Send message to specific contact",
+        "description" : "---",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "Contact ID of recipient and message text",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SendMessageRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Indicates whether message was accepted"
+          },
+          "400" : {
+            "description" : "On invalid parameters. See error details in response body.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/mobileAppSettings" : {
+      "get" : {
+        "tags" : [ "Settings" ],
+        "summary" : "Retrieve mobile app settings.",
+        "parameters" : [ {
+          "name" : "accountId",
+          "in" : "path",
+          "description" : "Your account identifier",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "number",
+            "format" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Retrieves mobile app settings",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Settings"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Settings"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "On invalid parameters. See error details in response body.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+          },
+          "428" : {
+            "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+          },
+          "429" : {
+            "description" : "On too many requests from same account. Wait for a minute and try again."
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "AttachmentDataList" : {
+        "type" : "array",
+        "description" : "list of uploading files",
+        "items" : {
+          "$ref" : "#/components/schemas/AttachmentData"
+        }
+      },
+      "AttachmentData" : {
+        "type" : "object",
+        "properties" : {
+          "Name" : {
+            "type" : "string",
+            "description" : "attachment name"
+          },
+          "MimeType" : {
+            "type" : "string",
+            "description" : "http ContentType (MIME type)"
+          },
+          "Data" : {
+            "type" : "object",
+            "description" : "uploading file data"
+          }
+        }
+      },
+      "FileInfo" : {
+        "type" : "object",
+        "properties" : {
+          "Id" : {
+            "type" : "integer",
+            "description" : "Unique attachment identifier"
+          },
+          "Name" : {
+            "type" : "string",
+            "description" : "attachment name"
+          },
+          "ContentType" : {
+            "type" : "string",
+            "description" : "http ContentType (MIME type)"
+          },
+          "Size" : {
+            "type" : "integer",
+            "description" : "File size"
+          },
+          "CreatedDate" : {
+            "type" : "string",
+            "description" : "Date and time when the file has been uploaded.",
+            "format" : "datetime"
+          }
+        },
+        "example" : {
+          "ContentType" : "ContentType",
+          "Size" : 6,
+          "CreatedDate" : "CreatedDate",
+          "Id" : 0,
+          "Name" : "Name"
+        }
+      },
+      "Settings" : {
+        "type" : "object",
+        "properties" : {
+          "AccountId" : {
+            "type" : "integer",
+            "description" : "Your account identifier."
+          },
+          "AppForMembersAvailable" : {
+            "type" : "boolean",
+            "description" : "Indicates whether an app for members available or not. It's not available for free accounts."
+          },
+          "EnableAppForMembers" : {
+            "type" : "boolean",
+            "description" : "Indicates whether an app for members enabled in settings or not"
+          },
+          "EnableEventsList" : {
+            "type" : "boolean",
+            "description" : "Indicates whether an event list is available"
+          },
+          "EnableMemberDirectory" : {
+            "type" : "boolean",
+            "description" : "Indicates whether a member directory is available"
+          },
+          "Tags" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "description" : "tag name"
+            }
+          }
+        },
+        "description" : "n/a",
+        "example" : {
+          "AccountId" : 0,
+          "EnableAppForMembers" : true,
+          "EnableEventsList" : true,
+          "AppForMembersAvailable" : true,
+          "EnableMemberDirectory" : true,
+          "Tags" : [ "Tags", "Tags" ]
+        }
+      },
+      "VerifyRegistrationCodeParams" : {
+        "type" : "object",
+        "properties" : {
+          "eventId" : {
+            "type" : "integer",
+            "description" : "Registration event ID"
+          },
+          "registrationTypeId" : {
+            "type" : "integer",
+            "description" : "Event registration type ID"
+          },
+          "code" : {
+            "type" : "string",
+            "description" : "Code to verify"
+          }
+        },
+        "description" : "Set of parameters for event registration code verification"
+      },
+      "SendMessageRequest" : {
+        "type" : "object",
+        "properties" : {
+          "contactId" : {
+            "type" : "integer",
+            "description" : "Contact ID of recipient"
+          },
+          "subject" : {
+            "type" : "string",
+            "description" : "Message subject"
+          },
+          "text" : {
+            "type" : "string",
+            "description" : "Message content in plain text"
+          },
+          "replyToName" : {
+            "type" : "string",
+            "description" : "Name used when replying to the message."
+          },
+          "replyToEMail" : {
+            "type" : "string",
+            "description" : "Email address used when replying to the message."
+          }
+        },
+        "description" : "Set of parameters for sending private message to contact/member"
+      },
+      "MembershipApplication" : {
+        "type" : "object",
+        "properties" : {
+          "membershipLevelId" : {
+            "type" : "integer",
+            "description" : "ID of membership level to apply for"
+          },
+          "fieldValues" : {
+            "type" : "array",
+            "description" : "Field values for membership application form",
+            "items" : {
+              "$ref" : "#/components/schemas/CustomFieldValue"
+            }
+          },
+          "couponCode" : {
+            "type" : "string",
+            "description" : "coupon code"
+          }
+        },
+        "description" : "Set of parameters to apply for membership"
+      },
+      "RenewParameters" : {
+        "type" : "object",
+        "properties" : {
+          "CouponCode" : {
+            "type" : "string",
+            "description" : "coupon code"
+          },
+          "fieldValues" : {
+            "type" : "array",
+            "description" : "Field values for membership renewal form",
+            "items" : {
+              "$ref" : "#/components/schemas/CustomFieldValue"
+            }
+          }
+        },
+        "description" : "Set of parameters to apply for renewal"
+      },
+      "Account" : {
+        "type" : "object",
+        "properties" : {
+          "Id" : {
+            "type" : "integer",
+            "description" : "Unique account identifier."
+          },
+          "Name" : {
+            "type" : "string",
+            "description" : "The organization name."
+          },
+          "Url" : {
+            "type" : "string",
+            "description" : "Address of API call providing account details."
+          },
+          "PrimaryDomainName" : {
+            "type" : "string",
+            "description" : "The primary domain name for the account."
+          },
+          "Resources" : {
+            "type" : "array",
+            "description" : "Collection of account-related resources.",
+            "items" : {
+              "$ref" : "#/components/schemas/Resource"
+            }
+          },
+          "Currency" : {
+            "$ref" : "#/components/schemas/Currency"
+          },
+          "Localization" : {
+            "$ref" : "#/components/schemas/Localization"
+          },
+          "TimeZone" : {
+            "$ref" : "#/components/schemas/TimeZoneDescription"
+          }
+        },
+        "description" : "Information about Wild Apricot account",
+        "example" : {
+          "TimeZone" : {
+            "UtcOffset" : 6.027456183070403,
+            "ZoneId" : "ZoneId",
+            "Name" : "Name"
+          },
+          "Currency" : {
+            "Symbol" : "Symbol",
+            "Code" : "Code",
+            "Name" : "Name"
+          },
+          "PrimaryDomainName" : "PrimaryDomainName",
+          "Id" : 0,
+          "Resources" : [ {
+            "Description" : "Description",
+            "AllowedOperations" : "AllowedOperations",
+            "Url" : "Url",
+            "Name" : "Name"
+          }, {
+            "Description" : "Description",
+            "AllowedOperations" : "AllowedOperations",
+            "Url" : "Url",
+            "Name" : "Name"
+          } ],
+          "Localization" : {
+            "TimeFormat" : "TimeFormat",
+            "DateFormat" : "DateFormat"
+          },
+          "Url" : "Url",
+          "Name" : "Name"
+        }
+      },
+      "Currency" : {
+        "title" : "Account currency info",
+        "type" : "object",
+        "properties" : {
+          "Code" : {
+            "type" : "string",
+            "description" : "Currency code according to ISO 4217"
+          },
+          "Name" : {
+            "type" : "string",
+            "description" : "Human-readable currency name"
+          },
+          "Symbol" : {
+            "type" : "string",
+            "description" : "Currency symbol e.g $ or €"
+          }
+        },
+        "example" : {
+          "Symbol" : "Symbol",
+          "Code" : "Code",
+          "Name" : "Name"
+        }
+      },
+      "Localization" : {
+        "type" : "object",
+        "properties" : {
+          "DateFormat" : {
+            "type" : "string",
+            "description" : "Format for displaying dates"
+          },
+          "TimeFormat" : {
+            "type" : "string",
+            "description" : "Format for displaying time"
+          }
+        },
+        "example" : {
+          "TimeFormat" : "TimeFormat",
+          "DateFormat" : "DateFormat"
+        }
+      },
+      "ContactsResponse" : {
+        "type" : "object",
+        "properties" : {
+          "Contacts" : {
+            "type" : "array",
+            "description" : "List of contacts found.",
+            "items" : {
+              "$ref" : "#/components/schemas/Contact"
+            }
+          },
+          "ContactIdentifiers" : {
+            "type" : "array",
+            "description" : "List of contact IDs found.",
+            "items" : {
+              "type" : "integer"
+            }
+          },
+          "Count" : {
+            "type" : "integer",
+            "description" : "Number of contacts found. Value appears only if $count was passed in parameters."
+          }
+        },
+        "description" : "Contains a collection of contacts or number of contacts or list of contact identifiers, depending on passed query parameters.",
+        "example" : {
+          "ContactIdentifiers" : [ 5, 5 ],
+          "Contacts" : [ {
+            "Organization" : "Organization",
+            "Email" : "Email",
+            "MembershipLevel" : {
+              "Id" : 6,
+              "Url" : null,
+              "Name" : "Name"
+            },
+            "FirstName" : "FirstName",
+            "Phone" : "Phone",
+            "SendMessageAllowed" : true,
+            "Id" : 0,
+            "LastName" : "LastName",
+            "FieldValues" : [ {
+              "FieldOrder" : 1,
+              "SystemCode" : "SystemCode",
+              "Value" : { },
+              "FieldName" : "FieldName",
+              "FieldType" : "String"
+            }, {
+              "FieldOrder" : 1,
+              "SystemCode" : "SystemCode",
+              "Value" : { },
+              "FieldName" : "FieldName",
+              "FieldType" : "String"
+            } ],
+            "Url" : "Url"
+          }, {
+            "Organization" : "Organization",
+            "Email" : "Email",
+            "MembershipLevel" : {
+              "Id" : 6,
+              "Url" : null,
+              "Name" : "Name"
+            },
+            "FirstName" : "FirstName",
+            "Phone" : "Phone",
+            "SendMessageAllowed" : true,
+            "Id" : 0,
+            "LastName" : "LastName",
+            "FieldValues" : [ {
+              "FieldOrder" : 1,
+              "SystemCode" : "SystemCode",
+              "Value" : { },
+              "FieldName" : "FieldName",
+              "FieldType" : "String"
+            }, {
+              "FieldOrder" : 1,
+              "SystemCode" : "SystemCode",
+              "Value" : { },
+              "FieldName" : "FieldName",
+              "FieldType" : "String"
+            } ],
+            "Url" : "Url"
+          } ],
+          "Count" : 5
+        }
+      },
+      "Contact" : {
+        "required" : [ "FieldValues", "Id" ],
+        "type" : "object",
+        "properties" : {
+          "Id" : {
+            "type" : "integer",
+            "description" : "Unique contact ID."
+          },
+          "Url" : {
+            "$ref" : "#/components/schemas/ResourceUrl"
+          },
+          "FirstName" : {
+            "type" : "string"
+          },
+          "LastName" : {
+            "type" : "string"
+          },
+          "Organization" : {
+            "type" : "string"
+          },
+          "Email" : {
+            "type" : "string"
+          },
+          "Phone" : {
+            "type" : "string"
+          },
+          "MembershipLevel" : {
+            "$ref" : "#/components/schemas/MembershipLevelStub"
+          },
+          "FieldValues" : {
+            "type" : "array",
+            "description" : "Collection of",
+            "items" : {
+              "$ref" : "#/components/schemas/CustomFieldValue"
+            }
+          },
+          "SendMessageAllowed" : {
+            "type" : "boolean"
+          }
+        },
+        "description" : "Contact / member data. Optional fields can be omitted if value is null or if the fields are restricted from viewing.",
+        "example" : {
+          "Organization" : "Organization",
+          "Email" : "Email",
+          "MembershipLevel" : {
+            "Id" : 6,
+            "Url" : null,
+            "Name" : "Name"
+          },
+          "FirstName" : "FirstName",
+          "Phone" : "Phone",
+          "SendMessageAllowed" : true,
+          "Id" : 0,
+          "LastName" : "LastName",
+          "FieldValues" : [ {
+            "FieldOrder" : 1,
+            "SystemCode" : "SystemCode",
+            "Value" : { },
+            "FieldName" : "FieldName",
+            "FieldType" : "String"
+          }, {
+            "FieldOrder" : 1,
+            "SystemCode" : "SystemCode",
+            "Value" : { },
+            "FieldName" : "FieldName",
+            "FieldType" : "String"
+          } ],
+          "Url" : "Url"
+        }
+      },
+      "ContactMe" : {
+        "type" : "object",
+        "properties" : {
+          "Id" : {
+            "type" : "integer",
+            "description" : "Contact ID of the current contact."
+          },
+          "Url" : {
+            "$ref" : "#/components/schemas/ResourceUrl"
+          },
+          "FirstName" : {
+            "type" : "string"
+          },
+          "LastName" : {
+            "type" : "string"
+          },
+          "Organization" : {
+            "type" : "string"
+          },
+          "Email" : {
+            "type" : "string"
+          },
+          "Phone" : {
+            "type" : "string"
+          },
+          "TermsOfUseAccepted" : {
+            "type" : "boolean"
+          },
+          "HasAvailableUserCard" : {
+            "type" : "boolean"
+          },
+          "MembershipStateDescription" : {
+            "type" : "string",
+            "description" : "Describes details of current membership status"
+          },
+          "IsRecurringPaymentsActive" : {
+            "type" : "boolean"
+          }
+        },
+        "description" : "Brief information about the current user.",
+        "example" : {
+          "TermsOfUseAccepted" : true,
+          "Organization" : "Organization",
+          "Email" : "Email",
+          "FirstName" : "FirstName",
+          "Phone" : "Phone",
+          "MembershipStateDescription" : "MembershipStateDescription",
+          "HasAvailableUserCard" : true,
+          "Id" : 0,
+          "LastName" : "LastName",
+          "IsRecurringPaymentsActive" : true,
+          "Url" : "Url"
+        }
+      },
+      "MembershipLevelStub" : {
+        "type" : "object",
+        "properties" : {
+          "Id" : {
+            "type" : "integer",
+            "description" : "Unique level identifier"
+          },
+          "Name" : {
+            "type" : "string",
+            "description" : "Membership level name"
+          },
+          "Url" : {
+            "$ref" : "#/components/schemas/ResourceUrl"
+          }
+        },
+        "description" : "Brief summary of membership level",
+        "example" : {
+          "Id" : 6,
+          "Url" : null,
+          "Name" : "Name"
+        }
+      },
+      "MembershipLevelPaymentMethod" : {
+        "type" : "string",
+        "description" : "Payment method for applications, renewals and upgrades for this membershipLevel.",
+        "enum" : [ "OnlineAndOffline", "OfflineOnly", "OnlineOnly" ]
+      },
+      "ResourceUrl" : {
+        "type" : "string",
+        "description" : "URL to access this object"
+      },
+      "CustomFieldValue" : {
+        "required" : [ "FieldName", "SystemCode", "Value" ],
+        "type" : "object",
+        "properties" : {
+          "FieldName" : {
+            "type" : "string",
+            "description" : "Field name. Can be changed by administrator, so it is not recommended to identify fields by their names."
+          },
+          "FieldType" : {
+            "$ref" : "#/components/schemas/CustomFieldType"
+          },
+          "FieldOrder" : {
+            "type" : "integer",
+            "description" : "Field order as described in forms."
+          },
+          "SystemCode" : {
+            "type" : "string",
+            "description" : "Unique identifier of field, so it can be used as a key to find custom field value record in a list."
+          },
+          "Value" : {
+            "type" : "object",
+            "description" : "Field value. Can be of type string, number, object or array. See related ContactField."
+          }
+        },
+        "example" : {
+          "FieldOrder" : 1,
+          "SystemCode" : "SystemCode",
+          "Value" : { },
+          "FieldName" : "FieldName",
+          "FieldType" : "String"
+        }
+      },
+      "ContactField" : {
+        "required" : [ "Access", "Description", "FieldName", "MemberOnly", "SystemCode", "Type" ],
+        "type" : "object",
+        "properties" : {
+          "FieldName" : {
+            "type" : "string",
+            "description" : "Field name to display on UI. It can be edited by administrator."
+          },
+          "SystemCode" : {
+            "type" : "string",
+            "description" : "System-defined code associated with the field. It does not change even if\nFieldName is modified\n"
+          },
+          "Type" : {
+            "$ref" : "#/components/schemas/CustomFieldType"
+          },
+          "DisplayType" : {
+            "type" : "string",
+            "description" : "Optional hint, which tells how to display and edit field. It appears\nfor String and Choice fields.\n"
+          },
+          "IsSystem" : {
+            "type" : "boolean",
+            "description" : "Field is system-defined."
+          },
+          "Access" : {
+            "$ref" : "#/components/schemas/CustomFieldAccessLevel"
+          },
+          "AdminOnly" : {
+            "type" : "boolean",
+            "description" : "Indicates that the field is accessible only by administrator."
+          },
+          "Description" : {
+            "type" : "string",
+            "description" : "User-defined description of the field."
+          },
+          "ExistsInLevels" : {
+            "type" : "array",
+            "description" : "Collection of membership levels (Id+Url pairs) where the field exists.",
+            "items" : {
+              "$ref" : "#/components/schemas/LinkedItem"
+            }
+          },
+          "AllowedValues" : {
+            "type" : "array",
+            "description" : "List of allowed values for this field. Appears for Choice / MultipleChoice fields.",
+            "items" : {
+              "$ref" : "#/components/schemas/CustomFieldAllowedValue"
+            }
+          },
+          "Order" : {
+            "type" : "integer",
+            "description" : "Sorting order to display the field in UI"
+          },
+          "MemberOnly" : {
+            "type" : "boolean",
+            "description" : "The field exists only for members."
+          },
+          "IsBuiltIn" : {
+            "type" : "boolean",
+            "description" : "The field is built-in system field, its definition can't be edited or\ndeleted.\n"
+          },
+          "SupportSearch" : {
+            "type" : "boolean",
+            "description" : "If true, then this field can be used in $filter expression in contact\nsearch.\n"
+          },
+          "IsIncludedInRenewal" : {
+            "type" : "boolean",
+            "description" : "If true, then this field is shown in renewal form.\n"
+          },
+          "AllowToChangeInRenewal" : {
+            "type" : "boolean",
+            "description" : "If true, then this field is allowed to be changed in renewal form.\n"
+          },
+          "RulesAndTermsInfo" : {
+            "$ref" : "#/components/schemas/CustomFieldRulesAndTermsInfo"
+          },
+          "ExtraCharge" : {
+            "$ref" : "#/components/schemas/CustomFieldExtraChargeInfo"
+          }
+        },
+        "example" : {
+          "Order" : 5,
+          "Description" : "Description",
+          "AllowedValues" : [ {
+            "Label" : "Label",
+            "Id" : 6,
+            "ExtraCost" : 1.4658129805029452
+          }, {
+            "Label" : "Label",
+            "Id" : 6,
+            "ExtraCost" : 1.4658129805029452
+          } ],
+          "DisplayType" : "DisplayType",
+          "AdminOnly" : true,
+          "SystemCode" : "SystemCode",
+          "Access" : "Public",
+          "SupportSearch" : true,
+          "RulesAndTermsInfo" : {
+            "Text" : "Text",
+            "Link" : "Link"
+          },
+          "Type" : "String",
+          "ExtraCharge" : {
+            "MultiplierType" : "ItemPrice",
+            "MinAmount" : 2,
+            "MaxCharge" : 3.616076749251911,
+            "Multiplier" : 5.637376656633329,
+            "MinCharge" : 9.301444243932576,
+            "MaxAmount" : 7
+          },
+          "AllowToChangeInRenewal" : true,
+          "MemberOnly" : true,
+          "IsSystem" : true,
+          "ExistsInLevels" : [ {
+            "Id" : 0,
+            "Url" : "Url"
+          }, {
+            "Id" : 0,
+            "Url" : "Url"
+          } ],
+          "FieldName" : "FieldName",
+          "IsBuiltIn" : true,
+          "IsIncludedInRenewal" : true
+        }
+      },
+      "CustomFieldAllowedValue" : {
+        "title" : "Option",
+        "required" : [ "Id", "Label" ],
+        "type" : "object",
+        "properties" : {
+          "Id" : {
+            "type" : "integer",
+            "description" : "Unique option identifier."
+          },
+          "Label" : {
+            "type" : "string",
+            "description" : "Human-readable text label."
+          },
+          "ExtraCost" : {
+            "type" : "number",
+            "description" : "Price of item, when applying for membership or registering for event.",
+            "format" : "decimal"
+          }
+        },
+        "example" : {
+          "Label" : "Label",
+          "Id" : 6,
+          "ExtraCost" : 1.4658129805029452
+        }
+      },
+      "CustomFieldRulesAndTermsInfo" : {
+        "title" : "RulesAndTermsInfo",
+        "type" : "object",
+        "properties" : {
+          "Text" : {
+            "type" : "string",
+            "description" : "Terms of use text."
+          },
+          "Link" : {
+            "type" : "string",
+            "description" : "Url of rules and terms document."
+          }
+        },
+        "description" : "Additional info for fields with rules / terms conditions. Not present\nfor other field types.\n",
+        "example" : {
+          "Text" : "Text",
+          "Link" : "Link"
+        }
+      },
+      "CustomFieldType" : {
+        "type" : "string",
+        "description" : "Field data type.",
+        "enum" : [ "String", "DateTime", "Boolean", "Choice", "MultipleChoice", "Picture", "Number", "CalculatedExtraCharge", "SectionDivider" ]
+      },
+      "ExtraChargeMultiplierType" : {
+        "type" : "string",
+        "description" : "Description of multiplier field.\n  ItemPrice multiplier specifies a price for each requested item.\n  Percentage multiplier specifies the percentage of the field value to use as extra charge.\n",
+        "enum" : [ "ItemPrice", "Percentage" ]
+      },
+      "CustomFieldExtraChargeInfo" : {
+        "title" : "ExtraChargeOptions",
+        "required" : [ "Multiplier", "MultiplierType" ],
+        "type" : "object",
+        "properties" : {
+          "MultiplierType" : {
+            "$ref" : "#/components/schemas/ExtraChargeMultiplierType"
+          },
+          "Multiplier" : {
+            "type" : "number",
+            "description" : "value of multiplier for extra charge calculation",
+            "format" : "decimal"
+          },
+          "MinAmount" : {
+            "type" : "integer",
+            "description" : "Minimum amount of items to request (minimal field value). Applies to\nItemPrice multiplier type only.\n"
+          },
+          "MaxAmount" : {
+            "type" : "integer",
+            "description" : "Maximum amount of items to request (maximum field value). Applies to ItemPrice multiplier type only.\n"
+          },
+          "MinCharge" : {
+            "type" : "number",
+            "description" : "Minimum extra charge. Applies to\nPercentage multiplier type only.\n",
+            "format" : "decimal"
+          },
+          "MaxCharge" : {
+            "type" : "number",
+            "description" : "Maximum extra charge. Applies to\nPercentage multiplier type only.\n",
+            "format" : "decimal"
+          }
+        },
+        "description" : "This property applies to CalculatedExtraCharge fields only.",
+        "example" : {
+          "MultiplierType" : "ItemPrice",
+          "MinAmount" : 2,
+          "MaxCharge" : 3.616076749251911,
+          "Multiplier" : 5.637376656633329,
+          "MinCharge" : 9.301444243932576,
+          "MaxAmount" : 7
+        }
+      },
+      "Invoice" : {
+        "required" : [ "DocumentDate", "DocumentNumber", "FullyPaid", "Id", "OrderType", "PaidAmount", "Url", "Value" ],
+        "type" : "object",
+        "properties" : {
+          "Id" : {
+            "title" : "Unique invoice identifier.",
+            "type" : "integer"
+          },
+          "Url" : {
+            "$ref" : "#/components/schemas/ResourceUrl"
+          },
+          "Value" : {
+            "type" : "number",
+            "description" : "Full value (amount) of this invoice, using account's primary currency.",
+            "format" : "decimal"
+          },
+          "DocumentNumber" : {
+            "type" : "string",
+            "description" : "Autoincremented for each subsequent invoice."
+          },
+          "DocumentDate" : {
+            "type" : "string",
+            "description" : "Date and time when invoice was created",
+            "format" : "date"
+          },
+          "PaidAmount" : {
+            "type" : "number",
+            "description" : "Sum of invoice already paid.",
+            "format" : "decimal"
+          },
+          "FullyPaid" : {
+            "type" : "boolean",
+            "description" : "Indicates whether invoice is fully paid"
+          },
+          "OrderType" : {
+            "$ref" : "#/components/schemas/InvoiceOrderType"
+          },
+          "OrderDetails" : {
+            "type" : "array",
+            "description" : "Collection of invoice subitems.",
+            "items" : {
+              "$ref" : "#/components/schemas/OrderDetail"
+            }
+          }
+        },
+        "example" : {
+          "OrderType" : "MembershipApplication",
+          "OrderDetails" : [ {
+            "Taxes" : {
+              "Tax2" : "",
+              "Tax1" : "",
+              "RoundedAmount" : 2.027123023002322,
+              "Amount" : 2.3021358869347655,
+              "NetAmount" : 3.616076749251911,
+              "CalculatedTax1" : 7.061401241503109,
+              "CalculatedTax2" : 9.301444243932576
+            },
+            "Price" : 5.962133916683182,
+            "Quantity" : 5.637376656633329,
+            "OrderDetailType" : "Unspecified",
+            "Notes" : "Notes"
+          }, {
+            "Taxes" : {
+              "Tax2" : "",
+              "Tax1" : "",
+              "RoundedAmount" : 2.027123023002322,
+              "Amount" : 2.3021358869347655,
+              "NetAmount" : 3.616076749251911,
+              "CalculatedTax1" : 7.061401241503109,
+              "CalculatedTax2" : 9.301444243932576
+            },
+            "Price" : 5.962133916683182,
+            "Quantity" : 5.637376656633329,
+            "OrderDetailType" : "Unspecified",
+            "Notes" : "Notes"
+          } ],
+          "Value" : 6.027456183070403,
+          "Id" : 0,
+          "DocumentNumber" : "DocumentNumber",
+          "DocumentDate" : "2000-01-23",
+          "FullyPaid" : true,
+          "Url" : "Url",
+          "PaidAmount" : 1.4658129805029452
+        }
+      },
+      "InvoiceOrderType" : {
+        "type" : "string",
+        "description" : "A reason for creating the invoice.",
+        "enum" : [ "MembershipApplication", "MembershipRenewal", "MembershipLevelChange", "EventRegistration", "Donation", "OnlineStore" ]
+      },
+      "OrderDetail" : {
+        "type" : "object",
+        "properties" : {
+          "Price" : {
+            "type" : "number",
+            "description" : "Sum to pay for this a single item. Can be negative in case of discount.",
+            "format" : "decimal"
+          },
+          "Quantity" : {
+            "type" : "number",
+            "description" : "Quantity of item",
+            "format" : "integer"
+          },
+          "Notes" : {
+            "type" : "string",
+            "description" : "Explanation for the item."
+          },
+          "OrderDetailType" : {
+            "$ref" : "#/components/schemas/OrderDetailType"
+          },
+          "Taxes" : {
+            "$ref" : "#/components/schemas/SalesTaxInfo"
+          }
+        },
+        "description" : "An invoice item",
+        "example" : {
+          "Taxes" : {
+            "Tax2" : "",
+            "Tax1" : "",
+            "RoundedAmount" : 2.027123023002322,
+            "Amount" : 2.3021358869347655,
+            "NetAmount" : 3.616076749251911,
+            "CalculatedTax1" : 7.061401241503109,
+            "CalculatedTax2" : 9.301444243932576
+          },
+          "Price" : 5.962133916683182,
+          "Quantity" : 5.637376656633329,
+          "OrderDetailType" : "Unspecified",
+          "Notes" : "Notes"
+        }
+      },
+      "OrderDetailType" : {
+        "type" : "string",
+        "description" : "Type of invoice detail item.",
+        "enum" : [ "Unspecified", "EventRegistration", "GuestsNumber", "GuestCard", "ExtraCost", "MemberLevel", "Prorate", "Discount", "Donation", "OnlineStoreProduct", "OnlineStoreShipping" ]
+      },
+      "SalesTaxInfo" : {
+        "type" : "object",
+        "properties" : {
+          "Amount" : {
+            "type" : "number",
+            "description" : "total gross amount including all taxes"
+          },
+          "CalculatedTax1" : {
+            "type" : "number",
+            "description" : "tax 1 amount"
+          },
+          "CalculatedTax2" : {
+            "type" : "number",
+            "description" : "tax 2 amount"
+          },
+          "NetAmount" : {
+            "type" : "number",
+            "description" : "net amount from invoice items"
+          },
+          "RoundedAmount" : {
+            "type" : "number",
+            "description" : "rounded total amount including all taxes"
+          },
+          "Tax1" : {
+            "allOf" : [ {
+              "$ref" : "#/components/schemas/SalesTax"
+            }, {
+              "description" : "applied Tax 1 description"
+            } ]
+          },
+          "Tax2" : {
+            "allOf" : [ {
+              "$ref" : "#/components/schemas/SalesTax"
+            }, {
+              "description" : "applied Tax 2 description"
+            } ]
+          }
+        },
+        "description" : "An invoice item tax details",
+        "example" : {
+          "Tax2" : "",
+          "Tax1" : "",
+          "RoundedAmount" : 2.027123023002322,
+          "Amount" : 2.3021358869347655,
+          "NetAmount" : 3.616076749251911,
+          "CalculatedTax1" : 7.061401241503109,
+          "CalculatedTax2" : 9.301444243932576
+        }
+      },
+      "SalesTax" : {
+        "type" : "object",
+        "properties" : {
+          "Name" : {
+            "type" : "string",
+            "description" : "Internal account tax name."
+          },
+          "PublicId" : {
+            "type" : "string",
+            "description" : "Public tax ID (displayed on invoices)."
+          },
+          "Rate" : {
+            "type" : "number",
+            "description" : "Tax rate value."
+          }
+        },
+        "description" : "Taxes applied to the invoice according to account Tax Rules settings."
+      },
+      "Payment" : {
+        "required" : [ "AllocatedValue", "DocumentDate", "DocumentNumber", "Id", "PaymentType", "Url", "Value" ],
+        "type" : "object",
+        "properties" : {
+          "Id" : {
+            "title" : "Unique payment identifier.",
+            "type" : "integer"
+          },
+          "Url" : {
+            "$ref" : "#/components/schemas/ResourceUrl"
+          },
+          "Value" : {
+            "type" : "number",
+            "description" : "Full value (amount) of this payment, using account's primary currency.",
+            "format" : "decimal"
+          },
+          "DocumentNumber" : {
+            "type" : "string",
+            "description" : "Autoincremented for each subsequent payment."
+          },
+          "DocumentDate" : {
+            "type" : "string",
+            "description" : "Date and time payment was received.",
+            "format" : "date"
+          },
+          "AllocatedValue" : {
+            "type" : "number",
+            "description" : "Sum of payment already allocated to existing invoices.",
+            "format" : "decimal"
+          },
+          "RefundedAmount" : {
+            "type" : "number",
+            "description" : "Amount of a refund assigned to the payment.",
+            "format" : "decimal"
+          },
+          "PaymentType" : {
+            "$ref" : "#/components/schemas/PaymentType"
+          },
+          "Comment" : {
+            "type" : "string"
+          }
+        },
+        "example" : {
+          "Comment" : "Comment",
+          "RefundedAmount" : 5.962133916683182,
+          "Value" : 6.027456183070403,
+          "AllocatedValue" : 1.4658129805029452,
+          "PaymentType" : "Unknown",
+          "Id" : 0,
+          "DocumentNumber" : "DocumentNumber",
+          "DocumentDate" : "2000-01-23",
+          "Url" : "Url"
+        }
+      },
+      "PaymentType" : {
+        "type" : "string",
+        "description" : "The reason for the payment.",
+        "enum" : [ "Unknown", "InvoicePayment", "DonationPayment" ]
+      },
+      "StartPaymentParams" : {
+        "required" : [ "InvoiceIds", "PaymentMethodType", "RedirectUrl" ],
+        "type" : "object",
+        "properties" : {
+          "InvoiceIds" : {
+            "type" : "array",
+            "description" : "Collection of identifiers of invoices to be paid",
+            "items" : {
+              "type" : "number"
+            }
+          },
+          "PaymentMethodType" : {
+            "type" : "string",
+            "description" : "An ID of payment method - one of methods from getAllowedPaymentMethodTypes call"
+          },
+          "RedirectUrl" : {
+            "type" : "string",
+            "description" : "An URL to redirect to after successfully entering payment info"
+          }
+        }
+      },
+      "PaymentStatus" : {
+        "type" : "string",
+        "description" : "Current status of payment started with startPayment api call",
+        "enum" : [ "OK", "Failed", "InProgress", "Cancelled" ]
+      },
+      "EventsResponse" : {
+        "type" : "object",
+        "properties" : {
+          "Events" : {
+            "type" : "array",
+            "description" : "List of events found.",
+            "items" : {
+              "$ref" : "#/components/schemas/Event"
+            }
+          },
+          "EventIdentifiers" : {
+            "type" : "array",
+            "description" : "List of identifiers of events found.",
+            "items" : {
+              "type" : "integer"
+            }
+          },
+          "Count" : {
+            "type" : "integer",
+            "description" : "Number of events found. Value is returned only if $count was passed in parameters."
+          }
+        },
+        "description" : "Contains a collection of events or number of events or list of event identifiers, depending on passed query parameters.",
+        "example" : {
+          "Events" : [ {
+            "StartDate" : "2000-01-23",
+            "StartTimeSpecified" : true,
+            "Details" : {
+              "MultipleRegistrationAllowed" : true,
+              "RegistrationStatistics" : {
+                "RegistrationsPaidCount" : 2,
+                "RegistrationsFreeCount" : 1,
+                "RegistrationsOnWaitlistCount" : 6,
+                "RegistrationsPartiallyPaidCount" : 1,
+                "RegistrationsUnpaidCount" : 4,
+                "RegistrationsCanceledCount" : 7,
+                "RegistrationsWithNoInvoiceCount" : 1
+              },
+              "Organizer" : "",
+              "IsAutoCancelRegistrationEnabled" : true,
+              "TimeZone" : {
+                "UtcOffset" : 6.027456183070403,
+                "ZoneId" : "ZoneId",
+                "Name" : "Name"
+              },
+              "EventRegistrationFields" : [ {
+                "Order" : 7,
+                "Type" : "String",
+                "Description" : "Description",
+                "AllowedValues" : [ {
+                  "Label" : "Label",
+                  "Id" : 6,
+                  "ExtraCost" : 1.4658129805029452
+                }, {
+                  "Label" : "Label",
+                  "Id" : 6,
+                  "ExtraCost" : 1.4658129805029452
+                } ],
+                "DisplayType" : "DisplayType",
+                "ExtraCharge" : {
+                  "MultiplierType" : "ItemPrice",
+                  "MinAmount" : 2,
+                  "MaxCharge" : 3.616076749251911,
+                  "Multiplier" : 5.637376656633329,
+                  "MinCharge" : 9.301444243932576,
+                  "MaxAmount" : 7
+                },
+                "SystemCode" : "SystemCode",
+                "Kind" : "Common",
+                "Access" : "Public",
+                "IsSystem" : true,
+                "RulesAndTermsInfo" : {
+                  "Text" : "Text",
+                  "Link" : "Link"
+                },
+                "FieldName" : "FieldName"
+              }, {
+                "Order" : 7,
+                "Type" : "String",
+                "Description" : "Description",
+                "AllowedValues" : [ {
+                  "Label" : "Label",
+                  "Id" : 6,
+                  "ExtraCost" : 1.4658129805029452
+                }, {
+                  "Label" : "Label",
+                  "Id" : 6,
+                  "ExtraCost" : 1.4658129805029452
+                } ],
+                "DisplayType" : "DisplayType",
+                "ExtraCharge" : {
+                  "MultiplierType" : "ItemPrice",
+                  "MinAmount" : 2,
+                  "MaxCharge" : 3.616076749251911,
+                  "Multiplier" : 5.637376656633329,
+                  "MinCharge" : 9.301444243932576,
+                  "MaxAmount" : 7
+                },
+                "SystemCode" : "SystemCode",
+                "Kind" : "Common",
+                "Access" : "Public",
+                "IsSystem" : true,
+                "RulesAndTermsInfo" : {
+                  "Text" : "Text",
+                  "Link" : "Link"
+                },
+                "FieldName" : "FieldName"
+              } ],
+              "IsWaitlistEnabled" : true,
+              "DescriptionHtml" : "DescriptionHtml",
+              "RegistrationAutoCancelTimeout" : 1.1730742509559433,
+              "PaymentMethod" : "OnlineAndOffline",
+              "RegistrationTypes" : [ {
+                "MultipleRegistrationAllowed" : true,
+                "Availability" : "Everyone",
+                "BasePrice" : 5.637376656633329,
+                "AvailableThrough" : "2000-01-23",
+                "Description" : "Description",
+                "GuestPrice" : 2.3021358869347655,
+                "CancellationBehavior" : "None",
+                "MaximumRegistrantsCount" : 7,
+                "CancellationDaysBeforeEvent" : 3,
+                "Url" : null,
+                "GuestRegistrationPolicy" : "Disabled",
+                "AvailableFrom" : "2000-01-23",
+                "Name" : "Name",
+                "CodeRequired" : true,
+                "CurrentRegistrantsCount" : 9,
+                "IsWaitlistEnabled" : true,
+                "EventId" : 5,
+                "AvailableForRegistration" : true,
+                "Id" : 1
+              }, {
+                "MultipleRegistrationAllowed" : true,
+                "Availability" : "Everyone",
+                "BasePrice" : 5.637376656633329,
+                "AvailableThrough" : "2000-01-23",
+                "Description" : "Description",
+                "GuestPrice" : 2.3021358869347655,
+                "CancellationBehavior" : "None",
+                "MaximumRegistrantsCount" : 7,
+                "CancellationDaysBeforeEvent" : 3,
+                "Url" : null,
+                "GuestRegistrationPolicy" : "Disabled",
+                "AvailableFrom" : "2000-01-23",
+                "Name" : "Name",
+                "CodeRequired" : true,
+                "CurrentRegistrantsCount" : 9,
+                "IsWaitlistEnabled" : true,
+                "EventId" : 5,
+                "AvailableForRegistration" : true,
+                "Id" : 1
+              } ],
+              "RegistrationsPublicVisibility" : "Nobody",
+              "WaitlistSettings" : {
+                "Type" : "None",
+                "InformationToCollect" : "Undefined"
+              }
+            },
+            "RegistrationEnabled" : true,
+            "Sessions" : [ {
+              "StartDate" : "2000-01-23",
+              "StartTimeSpecified" : true,
+              "EndTimeSpecified" : true,
+              "Title" : "Title",
+              "Id" : 4,
+              "EndDate" : "2000-01-23"
+            }, {
+              "StartDate" : "2000-01-23",
+              "StartTimeSpecified" : true,
+              "EndTimeSpecified" : true,
+              "Title" : "Title",
+              "Id" : 4,
+              "EndDate" : "2000-01-23"
+            } ],
+            "EndTimeSpecified" : true,
+            "RegistrationsLimit" : 6,
+            "Id" : 0,
+            "EndDate" : "2000-01-23",
+            "Url" : "Url",
+            "Name" : "Name",
+            "Location" : "Location"
+          }, {
+            "StartDate" : "2000-01-23",
+            "StartTimeSpecified" : true,
+            "Details" : {
+              "MultipleRegistrationAllowed" : true,
+              "RegistrationStatistics" : {
+                "RegistrationsPaidCount" : 2,
+                "RegistrationsFreeCount" : 1,
+                "RegistrationsOnWaitlistCount" : 6,
+                "RegistrationsPartiallyPaidCount" : 1,
+                "RegistrationsUnpaidCount" : 4,
+                "RegistrationsCanceledCount" : 7,
+                "RegistrationsWithNoInvoiceCount" : 1
+              },
+              "Organizer" : "",
+              "IsAutoCancelRegistrationEnabled" : true,
+              "TimeZone" : {
+                "UtcOffset" : 6.027456183070403,
+                "ZoneId" : "ZoneId",
+                "Name" : "Name"
+              },
+              "EventRegistrationFields" : [ {
+                "Order" : 7,
+                "Type" : "String",
+                "Description" : "Description",
+                "AllowedValues" : [ {
+                  "Label" : "Label",
+                  "Id" : 6,
+                  "ExtraCost" : 1.4658129805029452
+                }, {
+                  "Label" : "Label",
+                  "Id" : 6,
+                  "ExtraCost" : 1.4658129805029452
+                } ],
+                "DisplayType" : "DisplayType",
+                "ExtraCharge" : {
+                  "MultiplierType" : "ItemPrice",
+                  "MinAmount" : 2,
+                  "MaxCharge" : 3.616076749251911,
+                  "Multiplier" : 5.637376656633329,
+                  "MinCharge" : 9.301444243932576,
+                  "MaxAmount" : 7
+                },
+                "SystemCode" : "SystemCode",
+                "Kind" : "Common",
+                "Access" : "Public",
+                "IsSystem" : true,
+                "RulesAndTermsInfo" : {
+                  "Text" : "Text",
+                  "Link" : "Link"
+                },
+                "FieldName" : "FieldName"
+              }, {
+                "Order" : 7,
+                "Type" : "String",
+                "Description" : "Description",
+                "AllowedValues" : [ {
+                  "Label" : "Label",
+                  "Id" : 6,
+                  "ExtraCost" : 1.4658129805029452
+                }, {
+                  "Label" : "Label",
+                  "Id" : 6,
+                  "ExtraCost" : 1.4658129805029452
+                } ],
+                "DisplayType" : "DisplayType",
+                "ExtraCharge" : {
+                  "MultiplierType" : "ItemPrice",
+                  "MinAmount" : 2,
+                  "MaxCharge" : 3.616076749251911,
+                  "Multiplier" : 5.637376656633329,
+                  "MinCharge" : 9.301444243932576,
+                  "MaxAmount" : 7
+                },
+                "SystemCode" : "SystemCode",
+                "Kind" : "Common",
+                "Access" : "Public",
+                "IsSystem" : true,
+                "RulesAndTermsInfo" : {
+                  "Text" : "Text",
+                  "Link" : "Link"
+                },
+                "FieldName" : "FieldName"
+              } ],
+              "IsWaitlistEnabled" : true,
+              "DescriptionHtml" : "DescriptionHtml",
+              "RegistrationAutoCancelTimeout" : 1.1730742509559433,
+              "PaymentMethod" : "OnlineAndOffline",
+              "RegistrationTypes" : [ {
+                "MultipleRegistrationAllowed" : true,
+                "Availability" : "Everyone",
+                "BasePrice" : 5.637376656633329,
+                "AvailableThrough" : "2000-01-23",
+                "Description" : "Description",
+                "GuestPrice" : 2.3021358869347655,
+                "CancellationBehavior" : "None",
+                "MaximumRegistrantsCount" : 7,
+                "CancellationDaysBeforeEvent" : 3,
+                "Url" : null,
+                "GuestRegistrationPolicy" : "Disabled",
+                "AvailableFrom" : "2000-01-23",
+                "Name" : "Name",
+                "CodeRequired" : true,
+                "CurrentRegistrantsCount" : 9,
+                "IsWaitlistEnabled" : true,
+                "EventId" : 5,
+                "AvailableForRegistration" : true,
+                "Id" : 1
+              }, {
+                "MultipleRegistrationAllowed" : true,
+                "Availability" : "Everyone",
+                "BasePrice" : 5.637376656633329,
+                "AvailableThrough" : "2000-01-23",
+                "Description" : "Description",
+                "GuestPrice" : 2.3021358869347655,
+                "CancellationBehavior" : "None",
+                "MaximumRegistrantsCount" : 7,
+                "CancellationDaysBeforeEvent" : 3,
+                "Url" : null,
+                "GuestRegistrationPolicy" : "Disabled",
+                "AvailableFrom" : "2000-01-23",
+                "Name" : "Name",
+                "CodeRequired" : true,
+                "CurrentRegistrantsCount" : 9,
+                "IsWaitlistEnabled" : true,
+                "EventId" : 5,
+                "AvailableForRegistration" : true,
+                "Id" : 1
+              } ],
+              "RegistrationsPublicVisibility" : "Nobody",
+              "WaitlistSettings" : {
+                "Type" : "None",
+                "InformationToCollect" : "Undefined"
+              }
+            },
+            "RegistrationEnabled" : true,
+            "Sessions" : [ {
+              "StartDate" : "2000-01-23",
+              "StartTimeSpecified" : true,
+              "EndTimeSpecified" : true,
+              "Title" : "Title",
+              "Id" : 4,
+              "EndDate" : "2000-01-23"
+            }, {
+              "StartDate" : "2000-01-23",
+              "StartTimeSpecified" : true,
+              "EndTimeSpecified" : true,
+              "Title" : "Title",
+              "Id" : 4,
+              "EndDate" : "2000-01-23"
+            } ],
+            "EndTimeSpecified" : true,
+            "RegistrationsLimit" : 6,
+            "Id" : 0,
+            "EndDate" : "2000-01-23",
+            "Url" : "Url",
+            "Name" : "Name",
+            "Location" : "Location"
+          } ],
+          "EventIdentifiers" : [ 5, 5 ],
+          "Count" : 9
+        }
+      },
+      "Event" : {
+        "required" : [ "Id", "Location", "Name", "RegistrationEnabled", "StartDate", "Url" ],
+        "type" : "object",
+        "properties" : {
+          "Id" : {
+            "type" : "integer",
+            "description" : "Unique event identifier"
+          },
+          "Url" : {
+            "$ref" : "#/components/schemas/ResourceUrl"
+          },
+          "Name" : {
+            "type" : "string",
+            "description" : "Event title"
+          },
+          "Location" : {
+            "type" : "string",
+            "description" : "The location or address where event will take place."
+          },
+          "StartDate" : {
+            "type" : "string",
+            "description" : "Date and optionally time when event starts.",
+            "format" : "date"
+          },
+          "StartTimeSpecified" : {
+            "type" : "boolean",
+            "description" : "Indicates whether start time was explicitly specified in StartDate. Value of false means StartDate contains date only."
+          },
+          "EndDate" : {
+            "type" : "string",
+            "description" : "Date and optionally time when event completes.",
+            "format" : "date"
+          },
+          "EndTimeSpecified" : {
+            "type" : "boolean",
+            "description" : "Indicates whether end time was explicitly specified in EndDate. Value of false means EndDate contains date only."
+          },
+          "RegistrationEnabled" : {
+            "type" : "boolean",
+            "description" : "Indicates whether event is enabled for registration."
+          },
+          "RegistrationsLimit" : {
+            "type" : "integer",
+            "description" : "The registration limit for this event."
+          },
+          "Details" : {
+            "$ref" : "#/components/schemas/EventDetails"
+          },
+          "Sessions" : {
+            "type" : "array",
+            "description" : "Collection of event sessions for multisession events.",
+            "items" : {
+              "$ref" : "#/components/schemas/EventSession"
+            }
+          }
+        },
+        "example" : {
+          "StartDate" : "2000-01-23",
+          "StartTimeSpecified" : true,
+          "Details" : {
+            "MultipleRegistrationAllowed" : true,
+            "RegistrationStatistics" : {
+              "RegistrationsPaidCount" : 2,
+              "RegistrationsFreeCount" : 1,
+              "RegistrationsOnWaitlistCount" : 6,
+              "RegistrationsPartiallyPaidCount" : 1,
+              "RegistrationsUnpaidCount" : 4,
+              "RegistrationsCanceledCount" : 7,
+              "RegistrationsWithNoInvoiceCount" : 1
+            },
+            "Organizer" : "",
+            "IsAutoCancelRegistrationEnabled" : true,
+            "TimeZone" : {
+              "UtcOffset" : 6.027456183070403,
+              "ZoneId" : "ZoneId",
+              "Name" : "Name"
+            },
+            "EventRegistrationFields" : [ {
+              "Order" : 7,
+              "Type" : "String",
+              "Description" : "Description",
+              "AllowedValues" : [ {
+                "Label" : "Label",
+                "Id" : 6,
+                "ExtraCost" : 1.4658129805029452
+              }, {
+                "Label" : "Label",
+                "Id" : 6,
+                "ExtraCost" : 1.4658129805029452
+              } ],
+              "DisplayType" : "DisplayType",
+              "ExtraCharge" : {
+                "MultiplierType" : "ItemPrice",
+                "MinAmount" : 2,
+                "MaxCharge" : 3.616076749251911,
+                "Multiplier" : 5.637376656633329,
+                "MinCharge" : 9.301444243932576,
+                "MaxAmount" : 7
+              },
+              "SystemCode" : "SystemCode",
+              "Kind" : "Common",
+              "Access" : "Public",
+              "IsSystem" : true,
+              "RulesAndTermsInfo" : {
+                "Text" : "Text",
+                "Link" : "Link"
+              },
+              "FieldName" : "FieldName"
+            }, {
+              "Order" : 7,
+              "Type" : "String",
+              "Description" : "Description",
+              "AllowedValues" : [ {
+                "Label" : "Label",
+                "Id" : 6,
+                "ExtraCost" : 1.4658129805029452
+              }, {
+                "Label" : "Label",
+                "Id" : 6,
+                "ExtraCost" : 1.4658129805029452
+              } ],
+              "DisplayType" : "DisplayType",
+              "ExtraCharge" : {
+                "MultiplierType" : "ItemPrice",
+                "MinAmount" : 2,
+                "MaxCharge" : 3.616076749251911,
+                "Multiplier" : 5.637376656633329,
+                "MinCharge" : 9.301444243932576,
+                "MaxAmount" : 7
+              },
+              "SystemCode" : "SystemCode",
+              "Kind" : "Common",
+              "Access" : "Public",
+              "IsSystem" : true,
+              "RulesAndTermsInfo" : {
+                "Text" : "Text",
+                "Link" : "Link"
+              },
+              "FieldName" : "FieldName"
+            } ],
+            "IsWaitlistEnabled" : true,
+            "DescriptionHtml" : "DescriptionHtml",
+            "RegistrationAutoCancelTimeout" : 1.1730742509559433,
+            "PaymentMethod" : "OnlineAndOffline",
+            "RegistrationTypes" : [ {
+              "MultipleRegistrationAllowed" : true,
+              "Availability" : "Everyone",
+              "BasePrice" : 5.637376656633329,
+              "AvailableThrough" : "2000-01-23",
+              "Description" : "Description",
+              "GuestPrice" : 2.3021358869347655,
+              "CancellationBehavior" : "None",
+              "MaximumRegistrantsCount" : 7,
+              "CancellationDaysBeforeEvent" : 3,
+              "Url" : null,
+              "GuestRegistrationPolicy" : "Disabled",
+              "AvailableFrom" : "2000-01-23",
+              "Name" : "Name",
+              "CodeRequired" : true,
+              "CurrentRegistrantsCount" : 9,
+              "IsWaitlistEnabled" : true,
+              "EventId" : 5,
+              "AvailableForRegistration" : true,
+              "Id" : 1
+            }, {
+              "MultipleRegistrationAllowed" : true,
+              "Availability" : "Everyone",
+              "BasePrice" : 5.637376656633329,
+              "AvailableThrough" : "2000-01-23",
+              "Description" : "Description",
+              "GuestPrice" : 2.3021358869347655,
+              "CancellationBehavior" : "None",
+              "MaximumRegistrantsCount" : 7,
+              "CancellationDaysBeforeEvent" : 3,
+              "Url" : null,
+              "GuestRegistrationPolicy" : "Disabled",
+              "AvailableFrom" : "2000-01-23",
+              "Name" : "Name",
+              "CodeRequired" : true,
+              "CurrentRegistrantsCount" : 9,
+              "IsWaitlistEnabled" : true,
+              "EventId" : 5,
+              "AvailableForRegistration" : true,
+              "Id" : 1
+            } ],
+            "RegistrationsPublicVisibility" : "Nobody",
+            "WaitlistSettings" : {
+              "Type" : "None",
+              "InformationToCollect" : "Undefined"
+            }
+          },
+          "RegistrationEnabled" : true,
+          "Sessions" : [ {
+            "StartDate" : "2000-01-23",
+            "StartTimeSpecified" : true,
+            "EndTimeSpecified" : true,
+            "Title" : "Title",
+            "Id" : 4,
+            "EndDate" : "2000-01-23"
+          }, {
+            "StartDate" : "2000-01-23",
+            "StartTimeSpecified" : true,
+            "EndTimeSpecified" : true,
+            "Title" : "Title",
+            "Id" : 4,
+            "EndDate" : "2000-01-23"
+          } ],
+          "EndTimeSpecified" : true,
+          "RegistrationsLimit" : 6,
+          "Id" : 0,
+          "EndDate" : "2000-01-23",
+          "Url" : "Url",
+          "Name" : "Name",
+          "Location" : "Location"
+        }
+      },
+      "TimeZoneDescription" : {
+        "required" : [ "Name", "UtcOffset" ],
+        "type" : "object",
+        "properties" : {
+          "ZoneId" : {
+            "type" : "string"
+          },
+          "Name" : {
+            "type" : "string"
+          },
+          "UtcOffset" : {
+            "type" : "number",
+            "format" : "decimal"
+          }
+        },
+        "description" : "The timezone where an event will take place. If missing, then default timezone for this account is  used.",
+        "example" : {
+          "UtcOffset" : 6.027456183070403,
+          "ZoneId" : "ZoneId",
+          "Name" : "Name"
+        }
+      },
+      "EventWaitlistSettings" : {
+        "required" : [ "InformationToCollect", "Type" ],
+        "type" : "object",
+        "properties" : {
+          "Type" : {
+            "$ref" : "#/components/schemas/EventWaitlistType"
+          },
+          "InformationToCollect" : {
+            "$ref" : "#/components/schemas/EventWaitlistInformationToCollect"
+          }
+        },
+        "description" : "provides event waitlist settings and could be nullable",
+        "example" : {
+          "Type" : "None",
+          "InformationToCollect" : "Undefined"
+        }
+      },
+      "EventWaitlistType" : {
+        "type" : "string",
+        "description" : "it describes waitlist registration behaviour (Undefined value is unexpected)",
+        "enum" : [ "None", "Manual", "Auto" ]
+      },
+      "EventWaitlistInformationToCollect" : {
+        "type" : "string",
+        "description" : "it describes reqired information for register in waitlist (Undefined value is unexpected)",
+        "enum" : [ "Undefined", "NameAndEmail", "ContactInformation", "RegistrationInformation" ]
+      },
+      "EventDetails" : {
+        "required" : [ "DescriptionHtml", "EventRegistrationFields", "IsAutoCancelRegistrationEnabled", "IsWaitlistEnabled", "MultipleRegistrationAllowed", "PaymentMethod", "RegistrationStatistics", "RegistrationTypes" ],
+        "type" : "object",
+        "properties" : {
+          "DescriptionHtml" : {
+            "type" : "string",
+            "description" : "HTML description of event."
+          },
+          "TimeZone" : {
+            "$ref" : "#/components/schemas/TimeZoneDescription"
+          },
+          "RegistrationTypes" : {
+            "type" : "array",
+            "description" : "A list of available registration types (tickets). The list contains only types visible to current user.",
+            "items" : {
+              "$ref" : "#/components/schemas/EventRegistrationType"
+            }
+          },
+          "RegistrationStatistics" : {
+            "$ref" : "#/components/schemas/EventRegistrationStatistics"
+          },
+          "EventRegistrationFields" : {
+            "type" : "array",
+            "description" : "Collection of fields for registration form.",
+            "items" : {
+              "$ref" : "#/components/schemas/EventRegistrationField"
+            }
+          },
+          "Organizer" : {
+            "allOf" : [ {
+              "$ref" : "#/components/schemas/LinkedItem"
+            }, {
+              "description" : "Link to a contact designated as the event organizer."
+            } ]
+          },
+          "PaymentMethod" : {
+            "$ref" : "#/components/schemas/EventPaymentMethod"
+          },
+          "RegistrationsPublicVisibility" : {
+            "$ref" : "#/components/schemas/EventRegistrationsPublicVisibility"
+          },
+          "IsWaitlistEnabled" : {
+            "type" : "boolean",
+            "description" : "Shows if waitlist enabled for event"
+          },
+          "WaitlistSettings" : {
+            "$ref" : "#/components/schemas/EventWaitlistSettings"
+          },
+          "IsAutoCancelRegistrationEnabled" : {
+            "type" : "boolean",
+            "description" : "Shows if registration will be automatically canceled if not paid in specific timeout"
+          },
+          "RegistrationAutoCancelTimeout" : {
+            "type" : "number",
+            "description" : "Number of minutes to pay for created event registration."
+          },
+          "MultipleRegistrationAllowed" : {
+            "type" : "boolean",
+            "description" : "Indicates whether a single contact can register multiple times for the event."
+          }
+        },
+        "description" : "Additional details related to event.",
+        "example" : {
+          "MultipleRegistrationAllowed" : true,
+          "RegistrationStatistics" : {
+            "RegistrationsPaidCount" : 2,
+            "RegistrationsFreeCount" : 1,
+            "RegistrationsOnWaitlistCount" : 6,
+            "RegistrationsPartiallyPaidCount" : 1,
+            "RegistrationsUnpaidCount" : 4,
+            "RegistrationsCanceledCount" : 7,
+            "RegistrationsWithNoInvoiceCount" : 1
+          },
+          "Organizer" : "",
+          "IsAutoCancelRegistrationEnabled" : true,
+          "TimeZone" : {
+            "UtcOffset" : 6.027456183070403,
+            "ZoneId" : "ZoneId",
+            "Name" : "Name"
+          },
+          "EventRegistrationFields" : [ {
+            "Order" : 7,
+            "Type" : "String",
+            "Description" : "Description",
+            "AllowedValues" : [ {
+              "Label" : "Label",
+              "Id" : 6,
+              "ExtraCost" : 1.4658129805029452
+            }, {
+              "Label" : "Label",
+              "Id" : 6,
+              "ExtraCost" : 1.4658129805029452
+            } ],
+            "DisplayType" : "DisplayType",
+            "ExtraCharge" : {
+              "MultiplierType" : "ItemPrice",
+              "MinAmount" : 2,
+              "MaxCharge" : 3.616076749251911,
+              "Multiplier" : 5.637376656633329,
+              "MinCharge" : 9.301444243932576,
+              "MaxAmount" : 7
+            },
+            "SystemCode" : "SystemCode",
+            "Kind" : "Common",
+            "Access" : "Public",
+            "IsSystem" : true,
+            "RulesAndTermsInfo" : {
+              "Text" : "Text",
+              "Link" : "Link"
+            },
+            "FieldName" : "FieldName"
+          }, {
+            "Order" : 7,
+            "Type" : "String",
+            "Description" : "Description",
+            "AllowedValues" : [ {
+              "Label" : "Label",
+              "Id" : 6,
+              "ExtraCost" : 1.4658129805029452
+            }, {
+              "Label" : "Label",
+              "Id" : 6,
+              "ExtraCost" : 1.4658129805029452
+            } ],
+            "DisplayType" : "DisplayType",
+            "ExtraCharge" : {
+              "MultiplierType" : "ItemPrice",
+              "MinAmount" : 2,
+              "MaxCharge" : 3.616076749251911,
+              "Multiplier" : 5.637376656633329,
+              "MinCharge" : 9.301444243932576,
+              "MaxAmount" : 7
+            },
+            "SystemCode" : "SystemCode",
+            "Kind" : "Common",
+            "Access" : "Public",
+            "IsSystem" : true,
+            "RulesAndTermsInfo" : {
+              "Text" : "Text",
+              "Link" : "Link"
+            },
+            "FieldName" : "FieldName"
+          } ],
+          "IsWaitlistEnabled" : true,
+          "DescriptionHtml" : "DescriptionHtml",
+          "RegistrationAutoCancelTimeout" : 1.1730742509559433,
+          "PaymentMethod" : "OnlineAndOffline",
+          "RegistrationTypes" : [ {
+            "MultipleRegistrationAllowed" : true,
+            "Availability" : "Everyone",
+            "BasePrice" : 5.637376656633329,
+            "AvailableThrough" : "2000-01-23",
+            "Description" : "Description",
+            "GuestPrice" : 2.3021358869347655,
+            "CancellationBehavior" : "None",
+            "MaximumRegistrantsCount" : 7,
+            "CancellationDaysBeforeEvent" : 3,
+            "Url" : null,
+            "GuestRegistrationPolicy" : "Disabled",
+            "AvailableFrom" : "2000-01-23",
+            "Name" : "Name",
+            "CodeRequired" : true,
+            "CurrentRegistrantsCount" : 9,
+            "IsWaitlistEnabled" : true,
+            "EventId" : 5,
+            "AvailableForRegistration" : true,
+            "Id" : 1
+          }, {
+            "MultipleRegistrationAllowed" : true,
+            "Availability" : "Everyone",
+            "BasePrice" : 5.637376656633329,
+            "AvailableThrough" : "2000-01-23",
+            "Description" : "Description",
+            "GuestPrice" : 2.3021358869347655,
+            "CancellationBehavior" : "None",
+            "MaximumRegistrantsCount" : 7,
+            "CancellationDaysBeforeEvent" : 3,
+            "Url" : null,
+            "GuestRegistrationPolicy" : "Disabled",
+            "AvailableFrom" : "2000-01-23",
+            "Name" : "Name",
+            "CodeRequired" : true,
+            "CurrentRegistrantsCount" : 9,
+            "IsWaitlistEnabled" : true,
+            "EventId" : 5,
+            "AvailableForRegistration" : true,
+            "Id" : 1
+          } ],
+          "RegistrationsPublicVisibility" : "Nobody",
+          "WaitlistSettings" : {
+            "Type" : "None",
+            "InformationToCollect" : "Undefined"
+          }
+        }
+      },
+      "EventRegistrationStatistics" : {
+        "required" : [ "RegistrationsCanceledCount", "RegistrationsFreeCount", "RegistrationsOnWaitlistCount", "RegistrationsPaidCount", "RegistrationsPartiallyPaidCount", "RegistrationsUnpaidCount", "RegistrationsWithNoInvoiceCount" ],
+        "type" : "object",
+        "properties" : {
+          "RegistrationsPaidCount" : {
+            "type" : "integer",
+            "description" : "The current number of paid registrants for this event."
+          },
+          "RegistrationsUnpaidCount" : {
+            "type" : "integer",
+            "description" : "The current number of unpaid registrants for this event."
+          },
+          "RegistrationsCanceledCount" : {
+            "type" : "integer",
+            "description" : "The current number of canceled registrants for this event."
+          },
+          "RegistrationsFreeCount" : {
+            "type" : "integer",
+            "description" : "The current number of free registrants for this event."
+          },
+          "RegistrationsPartiallyPaidCount" : {
+            "type" : "integer",
+            "description" : "The current number of partially paid registrants for this event."
+          },
+          "RegistrationsWithNoInvoiceCount" : {
+            "type" : "integer",
+            "description" : "The current number of registrants without invoice for this event."
+          },
+          "RegistrationsOnWaitlistCount" : {
+            "type" : "integer",
+            "description" : "The current number of waitlisters for this event."
+          }
+        },
+        "description" : "All registrations on event distinguished by kind.",
+        "example" : {
+          "RegistrationsPaidCount" : 2,
+          "RegistrationsFreeCount" : 1,
+          "RegistrationsOnWaitlistCount" : 6,
+          "RegistrationsPartiallyPaidCount" : 1,
+          "RegistrationsUnpaidCount" : 4,
+          "RegistrationsCanceledCount" : 7,
+          "RegistrationsWithNoInvoiceCount" : 1
+        }
+      },
+      "EventRegistrationsPublicVisibility" : {
+        "type" : "string",
+        "description" : "Indicates who can see event registrants.",
+        "enum" : [ "Nobody", "Members", "Anybody" ]
+      },
+      "EventPaymentMethod" : {
+        "type" : "string",
+        "description" : "Payment method for registrations for this event.",
+        "enum" : [ "OnlineAndOffline", "OfflineOnly", "OnlineOnly" ]
+      },
+      "EventSession" : {
+        "required" : [ "Id", "StartDate" ],
+        "type" : "object",
+        "properties" : {
+          "Id" : {
+            "type" : "integer",
+            "description" : "Unique event session identifier."
+          },
+          "Title" : {
+            "type" : "string",
+            "description" : "Session title"
+          },
+          "StartDate" : {
+            "type" : "string",
+            "description" : "Date and optionally time when event session starts.",
+            "format" : "date"
+          },
+          "StartTimeSpecified" : {
+            "type" : "boolean",
+            "description" : "Indicates whether start time was explicitly specified in StartDate. A value of false means StartDate contains date only."
+          },
+          "EndDate" : {
+            "type" : "string",
+            "description" : "Date and optionally time when event session ends.",
+            "format" : "date"
+          },
+          "EndTimeSpecified" : {
+            "type" : "boolean",
+            "description" : "Indicates whether end time was explicitly specified in EndDate. A value of false means EndDate contains date only."
+          }
+        },
+        "example" : {
+          "StartDate" : "2000-01-23",
+          "StartTimeSpecified" : true,
+          "EndTimeSpecified" : true,
+          "Title" : "Title",
+          "Id" : 4,
+          "EndDate" : "2000-01-23"
+        }
+      },
+      "GuestRegistrationPolicy" : {
+        "type" : "string",
+        "enum" : [ "Disabled", "NumberOfGuests", "CollectContactDetails", "CollectFullInformation" ]
+      },
+      "EventRegistrationType" : {
+        "required" : [ "BasePrice", "CancellationBehavior", "CodeRequired", "Enabled", "EventId", "GuestRegistrationPolicy", "Id", "IsWaitlistEnabled", "MultipleRegistrationAllowed", "Name", "Url" ],
+        "type" : "object",
+        "properties" : {
+          "Id" : {
+            "type" : "integer",
+            "description" : "Unique event registration type identifier."
+          },
+          "Url" : {
+            "$ref" : "#/components/schemas/ResourceUrl"
+          },
+          "Name" : {
+            "type" : "string",
+            "description" : "Event registration type title."
+          },
+          "EventId" : {
+            "type" : "integer",
+            "description" : "Related event identifier"
+          },
+          "Description" : {
+            "type" : "string",
+            "description" : "Registration type (ticket) description"
+          },
+          "BasePrice" : {
+            "type" : "number",
+            "format" : "decimal"
+          },
+          "GuestPrice" : {
+            "type" : "number",
+            "format" : "decimal"
+          },
+          "AvailableForRegistration" : {
+            "type" : "boolean",
+            "description" : "Indicates whether this registration type is enabled user"
+          },
+          "CodeRequired" : {
+            "type" : "boolean",
+            "description" : "Indicates whether registration code is required to register."
+          },
+          "GuestRegistrationPolicy" : {
+            "$ref" : "#/components/schemas/GuestRegistrationPolicy"
+          },
+          "MaximumRegistrantsCount" : {
+            "type" : "integer",
+            "description" : "Maximum number of attendees for this registration type."
+          },
+          "IsWaitlistEnabled" : {
+            "type" : "boolean",
+            "description" : "Shows is waitlist enabled for registration type"
+          },
+          "MultipleRegistrationAllowed" : {
+            "type" : "boolean",
+            "description" : "Indicates whether a single contact can register multiple times for this event."
+          },
+          "CurrentRegistrantsCount" : {
+            "type" : "integer",
+            "description" : "The current number of registrants for this registration type."
+          },
+          "Availability" : {
+            "$ref" : "#/components/schemas/RegistrationTypeAccessLevel"
+          },
+          "AvailableFrom" : {
+            "type" : "string",
+            "description" : "The first day on which this registration type is available.",
+            "format" : "date"
+          },
+          "AvailableThrough" : {
+            "type" : "string",
+            "description" : "The last day on which this registration type is available.",
+            "format" : "date"
+          },
+          "CancellationBehavior" : {
+            "$ref" : "#/components/schemas/EventCancellationBehavior"
+          },
+          "CancellationDaysBeforeEvent" : {
+            "type" : "integer",
+            "description" : "Number of days when cancellation available before event started and CancellationBehavior is AllowUpToPeriodBeforeEvent."
+          }
+        },
+        "description" : "Settings for event registration type (ticket).",
+        "example" : {
+          "MultipleRegistrationAllowed" : true,
+          "Availability" : "Everyone",
+          "BasePrice" : 5.637376656633329,
+          "AvailableThrough" : "2000-01-23",
+          "Description" : "Description",
+          "GuestPrice" : 2.3021358869347655,
+          "CancellationBehavior" : "None",
+          "MaximumRegistrantsCount" : 7,
+          "CancellationDaysBeforeEvent" : 3,
+          "Url" : null,
+          "GuestRegistrationPolicy" : "Disabled",
+          "AvailableFrom" : "2000-01-23",
+          "Name" : "Name",
+          "CodeRequired" : true,
+          "CurrentRegistrantsCount" : 9,
+          "IsWaitlistEnabled" : true,
+          "EventId" : 5,
+          "AvailableForRegistration" : true,
+          "Id" : 1
+        }
+      },
+      "EventStub" : {
+        "required" : [ "Id", "Location", "Name", "StartDate", "Url" ],
+        "type" : "object",
+        "properties" : {
+          "Id" : {
+            "type" : "integer",
+            "description" : "Unique event identifier"
+          },
+          "Url" : {
+            "$ref" : "#/components/schemas/ResourceUrl"
+          },
+          "Name" : {
+            "type" : "string",
+            "description" : "Event title"
+          },
+          "Location" : {
+            "type" : "string",
+            "description" : "Location / address where event will take place"
+          },
+          "StartDate" : {
+            "type" : "string",
+            "description" : "Event start date",
+            "format" : "date"
+          },
+          "EndDate" : {
+            "type" : "string",
+            "description" : "Event end date",
+            "format" : "date"
+          }
+        },
+        "description" : "Related event",
+        "example" : {
+          "StartDate" : "2000-01-23",
+          "Id" : 6,
+          "EndDate" : "2000-01-23",
+          "Url" : null,
+          "Name" : "Name",
+          "Location" : "Location"
+        }
+      },
+      "EventAttendeesResponse" : {
+        "type" : "object",
+        "properties" : {
+          "RegistrationPublicInfos" : {
+            "type" : "array",
+            "description" : "List of public event registration infos found.",
+            "items" : {
+              "$ref" : "#/components/schemas/EventRegistrationPublicInfo"
+            }
+          },
+          "Identifiers" : {
+            "type" : "array",
+            "description" : "List of event registration IDs found.",
+            "items" : {
+              "type" : "integer"
+            }
+          },
+          "Count" : {
+            "type" : "integer",
+            "description" : "Number of registrations found. Value appears only if $count was passed in parameters."
+          }
+        },
+        "description" : "Contains a collection of attendees or number of attendees or list of of attendee identifiers, depending on passed query parameters.",
+        "example" : {
+          "RegistrationPublicInfos" : [ {
+            "NumberOfGuests" : 1,
+            "Organization" : "Organization",
+            "RegistrationDate" : "RegistrationDate",
+            "FirstName" : "FirstName",
+            "Id" : 0,
+            "LastName" : "LastName",
+            "ContactId" : 6,
+            "Url" : "Url"
+          }, {
+            "NumberOfGuests" : 1,
+            "Organization" : "Organization",
+            "RegistrationDate" : "RegistrationDate",
+            "FirstName" : "FirstName",
+            "Id" : 0,
+            "LastName" : "LastName",
+            "ContactId" : 6,
+            "Url" : "Url"
+          } ],
+          "Count" : 5,
+          "Identifiers" : [ 5, 5 ]
+        }
+      },
+      "EventRegistrationPublicInfo" : {
+        "required" : [ "ContactId", "FirstName", "Id", "LastName", "NumberOfGuests", "Organization", "RegistrationDate", "Url" ],
+        "type" : "object",
+        "properties" : {
+          "Id" : {
+            "type" : "integer",
+            "description" : "Unique identifier of event registration"
+          },
+          "Url" : {
+            "$ref" : "#/components/schemas/ResourceUrl"
+          },
+          "FirstName" : {
+            "type" : "string",
+            "description" : "Registration first name."
+          },
+          "LastName" : {
+            "type" : "string",
+            "description" : "Registration last name."
+          },
+          "Organization" : {
+            "type" : "string",
+            "description" : "Registration organization name."
+          },
+          "ContactId" : {
+            "type" : "integer",
+            "description" : "Id of contact with public-enabled membership (absent if registration contact is not a member or profile not enabled to public)."
+          },
+          "NumberOfGuests" : {
+            "type" : "integer",
+            "description" : "Number of additionally registered guests."
+          },
+          "RegistrationDate" : {
+            "type" : "string",
+            "description" : "Date and time when registration was created. (Account local time)",
+            "format" : "datetime"
+          }
+        },
+        "example" : {
+          "NumberOfGuests" : 1,
+          "Organization" : "Organization",
+          "RegistrationDate" : "RegistrationDate",
+          "FirstName" : "FirstName",
+          "Id" : 0,
+          "LastName" : "LastName",
+          "ContactId" : 6,
+          "Url" : "Url"
+        }
+      },
+      "EventRegistration" : {
+        "required" : [ "Event", "Id", "IsGuestRegistration", "RegistrationType", "ShowToPublic", "Url" ],
+        "type" : "object",
+        "properties" : {
+          "Id" : {
+            "type" : "integer",
+            "description" : "Unique event registration identifier"
+          },
+          "Url" : {
+            "$ref" : "#/components/schemas/ResourceUrl"
+          },
+          "Event" : {
+            "$ref" : "#/components/schemas/EventStub"
+          },
+          "RegistrationType" : {
+            "$ref" : "#/components/schemas/LinkedItemWithName"
+          },
+          "Invoice" : {
+            "$ref" : "#/components/schemas/LinkedItem"
+          },
+          "RegistrationFee" : {
+            "type" : "number",
+            "description" : "Total registration fee, including all taxes and discounts.",
+            "format" : "decimal"
+          },
+          "PaidAmount" : {
+            "type" : "number",
+            "description" : "The value that was already paid.",
+            "format" : "decimal"
+          },
+          "ShowToPublic" : {
+            "type" : "boolean",
+            "description" : "Indicates whether to include this registrant in the public list of registrants."
+          },
+          "RegistrationFields" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CustomFieldValue"
+            }
+          },
+          "HasChildRegistrations" : {
+            "type" : "boolean",
+            "description" : "Indicates whether there are event registrations with parent registration id equal to id of current registration. In order to get child registrations make a call to /accounts/XXX/eventregistrations?parentRegistrationId=YYY"
+          },
+          "NumberOfGuests" : {
+            "type" : "integer",
+            "description" : "Number of guests in this registration. This number does not include child registrations."
+          },
+          "IsGuestRegistration" : {
+            "type" : "boolean"
+          },
+          "Status" : {
+            "$ref" : "#/components/schemas/EventRegistrationStatus"
+          },
+          "ParentRegistration" : {
+            "$ref" : "#/components/schemas/LinkedItem"
+          }
+        },
+        "description" : "A record of registration for an event.",
+        "example" : {
+          "ShowToPublic" : true,
+          "Status" : "Undefined",
+          "IsGuestRegistration" : true,
+          "NumberOfGuests" : 2,
+          "Invoice" : {
+            "Id" : 0,
+            "Url" : "Url"
+          },
+          "HasChildRegistrations" : true,
+          "Url" : "Url",
+          "PaidAmount" : 5.637376656633329,
+          "RegistrationFields" : [ {
+            "FieldOrder" : 1,
+            "SystemCode" : "SystemCode",
+            "Value" : { },
+            "FieldName" : "FieldName",
+            "FieldType" : "String"
+          }, {
+            "FieldOrder" : 1,
+            "SystemCode" : "SystemCode",
+            "Value" : { },
+            "FieldName" : "FieldName",
+            "FieldType" : "String"
+          } ],
+          "RegistrationFee" : 5.962133916683182,
+          "ParentRegistration" : null,
+          "RegistrationType" : {
+            "Id" : 1,
+            "Url" : null,
+            "Name" : "Name"
+          },
+          "Event" : {
+            "StartDate" : "2000-01-23",
+            "Id" : 6,
+            "EndDate" : "2000-01-23",
+            "Url" : null,
+            "Name" : "Name",
+            "Location" : "Location"
+          },
+          "Id" : 0
+        }
+      },
+      "EventRegistrationStatus" : {
+        "type" : "string",
+        "description" : "Describes event registration status\n",
+        "enum" : [ "Undefined", "Paid", "Unpaid", "PartiallyPaid", "Canceled", "Free", "NoInvoice", "OnWaitlist" ]
+      },
+      "EventRegistrationField" : {
+        "required" : [ "Access", "Description", "FieldName", "IsSystem", "Kind", "SystemCode", "Type" ],
+        "type" : "object",
+        "properties" : {
+          "FieldName" : {
+            "type" : "string",
+            "description" : "Field name to display on UI. It can be edited by administrator."
+          },
+          "SystemCode" : {
+            "type" : "string",
+            "description" : "System-defined code associated with field. It does not change even if\nFieldName is edited\n"
+          },
+          "Type" : {
+            "$ref" : "#/components/schemas/CustomFieldType"
+          },
+          "DisplayType" : {
+            "type" : "string",
+            "description" : "Optional hint, which tells how to display and edit field. It appears\nfor String and Choice fields.\n"
+          },
+          "IsSystem" : {
+            "type" : "boolean",
+            "description" : "Field is system-defined."
+          },
+          "Access" : {
+            "$ref" : "#/components/schemas/CustomFieldAccessLevel"
+          },
+          "Description" : {
+            "type" : "string",
+            "description" : "User-defined description of the field."
+          },
+          "AllowedValues" : {
+            "type" : "array",
+            "description" : "List of allowed values for this field. Appears for Choice / MultipleChoice fields.",
+            "items" : {
+              "$ref" : "#/components/schemas/CustomFieldAllowedValue"
+            }
+          },
+          "Order" : {
+            "type" : "integer",
+            "description" : "Sorting order to display the field in UI"
+          },
+          "RulesAndTermsInfo" : {
+            "$ref" : "#/components/schemas/CustomFieldRulesAndTermsInfo"
+          },
+          "ExtraCharge" : {
+            "$ref" : "#/components/schemas/CustomFieldExtraChargeInfo"
+          },
+          "Kind" : {
+            "$ref" : "#/components/schemas/EventRegistrationFieldKind"
+          }
+        },
+        "example" : {
+          "Order" : 7,
+          "Type" : "String",
+          "Description" : "Description",
+          "AllowedValues" : [ {
+            "Label" : "Label",
+            "Id" : 6,
+            "ExtraCost" : 1.4658129805029452
+          }, {
+            "Label" : "Label",
+            "Id" : 6,
+            "ExtraCost" : 1.4658129805029452
+          } ],
+          "DisplayType" : "DisplayType",
+          "ExtraCharge" : {
+            "MultiplierType" : "ItemPrice",
+            "MinAmount" : 2,
+            "MaxCharge" : 3.616076749251911,
+            "Multiplier" : 5.637376656633329,
+            "MinCharge" : 9.301444243932576,
+            "MaxAmount" : 7
+          },
+          "SystemCode" : "SystemCode",
+          "Kind" : "Common",
+          "Access" : "Public",
+          "IsSystem" : true,
+          "RulesAndTermsInfo" : {
+            "Text" : "Text",
+            "Link" : "Link"
+          },
+          "FieldName" : "FieldName"
+        }
+      },
+      "CustomFieldAccessLevel" : {
+        "type" : "string",
+        "description" : "Default access level for the field. Describes who can access this\nfield.\n",
+        "enum" : [ "Public", "Member", "Nobody" ]
+      },
+      "AccessLevel" : {
+        "type" : "string",
+        "enum" : [ "Anybody", "Members", "Nobody" ]
+      },
+      "EventCancellationBehavior" : {
+        "type" : "string",
+        "description" : "Event cancellation behavior types.",
+        "enum" : [ "None", "DoNotAllow", "AllowUpToPeriodBeforeEvent", "Allow" ]
+      },
+      "RegistrationTypeAccessLevel" : {
+        "type" : "string",
+        "description" : "Whether this registration type is available for Everyone or just MembersOnly.",
+        "enum" : [ "Everyone", "MembersOnly" ]
+      },
+      "EventRegistrationFieldKind" : {
+        "type" : "string",
+        "description" : "Common - field is a part of contact fieldset. Custom - field is specific to event.",
+        "enum" : [ "Common", "Custom" ]
+      },
+      "MembershipLevelType" : {
+        "type" : "string",
+        "enum" : [ "Individual", "Bundle" ]
+      },
+      "MembershipRenewalPeriod" : {
+        "required" : [ "Kind" ],
+        "type" : "object",
+        "properties" : {
+          "Kind" : {
+            "$ref" : "#/components/schemas/RenewalPeriodKind"
+          },
+          "StartFromJoinDate" : {
+            "type" : "boolean",
+            "description" : "If true, renewal dates are calculated starting from join date. Otherwise,  renewal dates are specified in Dates field."
+          },
+          "YearPeriod" : {
+            "type" : "integer",
+            "description" : "For EveryNYears renewal, specifies number of years between renewals."
+          },
+          "Dates" : {
+            "type" : "array",
+            "description" : "Renewal dates during a year. For monthly renewals, it contains 12 records.",
+            "items" : {
+              "$ref" : "#/components/schemas/DayOfYear"
+            }
+          },
+          "RenewalLimits" : {
+            "$ref" : "#/components/schemas/RenewalLimits"
+          }
+        },
+        "example" : {
+          "YearPeriod" : 5,
+          "Kind" : "Never",
+          "StartFromJoinDate" : true,
+          "Dates" : [ {
+            "Month" : 5,
+            "Day" : 2
+          }, {
+            "Month" : 5,
+            "Day" : 2
+          } ],
+          "RenewalLimits" : {
+            "ExpirationPeriod" : {
+              "PeriodType" : "Days",
+              "Active" : true,
+              "Length" : 7
+            },
+            "OnePeriodAhead" : true
+          }
+        }
+      },
+      "RenewalLimits" : {
+        "type" : "object",
+        "properties" : {
+          "OnePeriodAhead" : {
+            "type" : "boolean",
+            "description" : "Limit renewal to 1 period ahead"
+          },
+          "ExpirationPeriod" : {
+            "$ref" : "#/components/schemas/RenewalExpirationPeriod"
+          }
+        },
+        "example" : {
+          "ExpirationPeriod" : {
+            "PeriodType" : "Days",
+            "Active" : true,
+            "Length" : 7
+          },
+          "OnePeriodAhead" : true
+        }
+      },
+      "RenewalExpirationPeriod" : {
+        "type" : "object",
+        "properties" : {
+          "Active" : {
+            "type" : "boolean",
+            "description" : "Limit renewal to within certain period"
+          },
+          "Length" : {
+            "type" : "integer",
+            "description" : "number of Days or Weeks (PeriodType)"
+          },
+          "PeriodType" : {
+            "$ref" : "#/components/schemas/RenewalExpirationPeriodType"
+          }
+        },
+        "example" : {
+          "PeriodType" : "Days",
+          "Active" : true,
+          "Length" : 7
+        }
+      },
+      "RenewalExpirationPeriodType" : {
+        "type" : "string",
+        "description" : "Expiration period type",
+        "enum" : [ "Days", "Months" ]
+      },
+      "RenewalPeriodKind" : {
+        "type" : "string",
+        "description" : "How often membership should be renewed",
+        "enum" : [ "Never", "Monthly", "Quarterly", "TwiceAYear", "EveryNYears" ]
+      },
+      "DayOfYear" : {
+        "type" : "object",
+        "properties" : {
+          "Month" : {
+            "type" : "integer",
+            "description" : "Month of renewal. 1 - Jan ... 12 - Dec"
+          },
+          "Day" : {
+            "type" : "integer",
+            "description" : "Day of the month"
+          }
+        },
+        "example" : {
+          "Month" : 5,
+          "Day" : 2
+        }
+      },
+      "MembershipLevel" : {
+        "required" : [ "AutomaticRecurringPayments", "Id", "MembershipFee", "Name", "RenewalPeriod", "Type", "Url" ],
+        "type" : "object",
+        "properties" : {
+          "Id" : {
+            "type" : "integer",
+            "description" : "Unique membership level identifier"
+          },
+          "Url" : {
+            "$ref" : "#/components/schemas/ResourceUrl"
+          },
+          "Name" : {
+            "type" : "string",
+            "description" : "Membership level title"
+          },
+          "Description" : {
+            "type" : "string",
+            "description" : "Level description"
+          },
+          "Type" : {
+            "$ref" : "#/components/schemas/MembershipLevelType"
+          },
+          "MembershipFee" : {
+            "type" : "number",
+            "description" : "The membership fee for one renewal period. See RenewalPeriod setttings for details.",
+            "format" : "decimal"
+          },
+          "BundleMembersLimit" : {
+            "type" : "integer",
+            "description" : "Maximum number of bundle members. Empty for individuals."
+          },
+          "RenewalPeriod" : {
+            "$ref" : "#/components/schemas/MembershipRenewalPeriod"
+          },
+          "AutomaticRecurringPayments" : {
+            "type" : "boolean",
+            "description" : "For levels with renewal period != Never. If true then membership will be automatically renewed and user charged each next membership period."
+          },
+          "MemberCanChangeToLevels" : {
+            "type" : "array",
+            "description" : "Collection of membership levels that members on this level can change to.",
+            "items" : {
+              "$ref" : "#/components/schemas/ResourceUrl"
+            }
+          },
+          "PaymentMethod" : {
+            "$ref" : "#/components/schemas/MembershipLevelPaymentMethod"
+          },
+          "DiscountCouponExists" : {
+            "type" : "boolean",
+            "description" : "is there any applicable discount coupon"
+          }
+        },
+        "example" : {
+          "Type" : "Individual",
+          "MembershipFee" : 6.027456183070403,
+          "Description" : "Description",
+          "AutomaticRecurringPayments" : true,
+          "MemberCanChangeToLevels" : [ null, null ],
+          "PaymentMethod" : "OnlineAndOffline",
+          "Id" : 0,
+          "BundleMembersLimit" : 1,
+          "DiscountCouponExists" : true,
+          "Url" : "Url",
+          "RenewalPeriod" : {
+            "YearPeriod" : 5,
+            "Kind" : "Never",
+            "StartFromJoinDate" : true,
+            "Dates" : [ {
+              "Month" : 5,
+              "Day" : 2
+            }, {
+              "Month" : 5,
+              "Day" : 2
+            } ],
+            "RenewalLimits" : {
+              "ExpirationPeriod" : {
+                "PeriodType" : "Days",
+                "Active" : true,
+                "Length" : 7
+              },
+              "OnePeriodAhead" : true
+            }
+          },
+          "Name" : "Name"
+        }
+      },
+      "MembershipApplicationResult" : {
+        "required" : [ "NewLevel" ],
+        "type" : "object",
+        "properties" : {
+          "NextRenewalDate" : {
+            "type" : "string",
+            "description" : "Expected next renewal date",
+            "format" : "date"
+          },
+          "Invoice" : {
+            "$ref" : "#/components/schemas/LinkedItem"
+          }
+        },
+        "example" : {
+          "Invoice" : {
+            "Id" : 0,
+            "Url" : "Url"
+          },
+          "NextRenewalDate" : "2000-01-23"
+        }
+      },
+      "CalculateRenewalResult" : {
+        "required" : [ "NewLevel" ],
+        "type" : "object",
+        "properties" : {
+          "NewLevel" : {
+            "$ref" : "#/components/schemas/LinkedItem"
+          },
+          "Invoice" : {
+            "$ref" : "#/components/schemas/LinkedItem"
+          }
+        },
+        "example" : {
+          "Invoice" : null,
+          "NewLevel" : {
+            "Id" : 0,
+            "Url" : "Url"
+          }
+        }
+      },
+      "PaymentMethodTypeDescription" : {
+        "required" : [ "Description", "PaymentMethodType" ],
+        "type" : "object",
+        "properties" : {
+          "PaymentMethodType" : {
+            "type" : "string",
+            "description" : "Payment method type ID"
+          },
+          "Description" : {
+            "type" : "string",
+            "description" : "Payment method description"
+          }
+        },
+        "example" : {
+          "PaymentMethodType" : "PaymentMethodType",
+          "Description" : "Description"
+        }
+      },
+      "PaymentTrackingInfo" : {
+        "required" : [ "PaymentPageUrl", "TrackingIdentifier" ],
+        "type" : "object",
+        "properties" : {
+          "TrackingIdentifier" : {
+            "type" : "string",
+            "description" : "Identifier of credit card payment to track payment progress"
+          },
+          "PaymentPageUrl" : {
+            "type" : "string",
+            "description" : "URL of page to enter payment information, like credit card data or PayPal password"
+          }
+        },
+        "example" : {
+          "PaymentPageUrl" : "PaymentPageUrl",
+          "TrackingIdentifier" : "TrackingIdentifier"
+        }
+      },
+      "LinkedItem" : {
+        "required" : [ "Id", "Url" ],
+        "type" : "object",
+        "properties" : {
+          "Id" : {
+            "type" : "integer",
+            "description" : "unique item identifier"
+          },
+          "Url" : {
+            "$ref" : "#/components/schemas/ResourceUrl"
+          }
+        },
+        "example" : {
+          "Id" : 0,
+          "Url" : "Url"
+        }
+      },
+      "LinkedItemWithName" : {
+        "required" : [ "Id", "Name", "Url" ],
+        "type" : "object",
+        "properties" : {
+          "Id" : {
+            "type" : "integer",
+            "description" : "unique item identifier"
+          },
+          "Url" : {
+            "$ref" : "#/components/schemas/ResourceUrl"
+          },
+          "Name" : {
+            "type" : "string",
+            "description" : "Item title"
+          }
+        },
+        "example" : {
+          "Id" : 1,
+          "Url" : null,
+          "Name" : "Name"
+        }
+      },
+      "Resource" : {
+        "required" : [ "Name", "Url" ],
+        "type" : "object",
+        "properties" : {
+          "Url" : {
+            "type" : "string",
+            "description" : "Address of resource"
+          },
+          "Name" : {
+            "type" : "string",
+            "description" : "Name of resource"
+          },
+          "Description" : {
+            "type" : "string",
+            "description" : "Optional text description of the resource."
+          },
+          "AllowedOperations" : {
+            "type" : "string",
+            "description" : "Collection of allowed operations for this resource. Possible values are:\nGET - Resource can be requested\nPOST - Resource can be created\nPUT - Resource can be updated\nDELETE - Resource can be deleted\n"
+          }
+        },
+        "example" : {
+          "Description" : "Description",
+          "AllowedOperations" : "AllowedOperations",
+          "Url" : "Url",
+          "Name" : "Name"
+        }
+      },
+      "EventRegistrationParams" : {
+        "type" : "object",
+        "properties" : {
+          "Id" : {
+            "type" : "integer",
+            "description" : "Unique event registration identifier. Required while updating existing registration. Should not be included when creating new registration."
+          },
+          "EventId" : {
+            "type" : "integer",
+            "description" : "Related event identifier. Required when creating new registration. Will be ignored while updating existing registration."
+          },
+          "RegistrationTypeId" : {
+            "type" : "integer",
+            "description" : "Selected registration type identifier. Required when creating new registration."
+          },
+          "RegistrationFields" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CustomFieldValue"
+            }
+          },
+          "ParentRegistrationId" : {
+            "type" : "integer",
+            "description" : "For guest registrations: parent registration identifier. Will be ignored when updating existing registration."
+          },
+          "ShowToPublic" : {
+            "type" : "boolean",
+            "description" : "Indicates whether the registrant is included in the public list of event registrants."
+          },
+          "ForWaitList" : {
+            "type" : "boolean",
+            "description" : "Indicates whether the registration is for new Wait List entry"
+          },
+          "NumberOfGuests" : {
+            "type" : "integer",
+            "description" : "The number of guests for this registration, if guest registrations are set up to collect only the total number of guests."
+          },
+          "RegistrationCode" : {
+            "type" : "string",
+            "description" : "The registration code for this event."
+          },
+          "PaymentMethodType" : {
+            "type" : "string",
+            "description" : "An ID of payment method - one of methods from getAllowedPaymentMethodTypes call. If not set then invoice will be sent to registrant's email."
+          }
+        },
+        "description" : "A record of registration for an event."
+      },
+      "Error" : {
+        "required" : [ "code", "message" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "Error code, like Validation / Search / ..."
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "An explanation of why this error occured"
+          },
+          "details" : {
+            "type" : "object",
+            "description" : "More information about the error. Data structure is specific for each error kind."
+          }
+        }
+      }
+    },
+    "responses" : {
+      "badRequest" : {
+        "description" : "On invalid parameters. See error details in response body.",
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "$ref" : "#/components/schemas/Error"
+            }
+          },
+          "application/xml" : {
+            "schema" : {
+              "$ref" : "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "unauthorized" : {
+        "description" : "oAuth token was not provided, invalid or does not provide access to requested URL."
+      },
+      "tooManyRequests" : {
+        "description" : "On too many requests from same account. Wait for a minute and try again."
+      },
+      "notFound" : {
+        "description" : "Requested item not found."
+      },
+      "termsOfUseRequired" : {
+        "description" : "Current user should accept terms of use before using API. It can be done in web interface, or by making a POST request to /rpc/{accountId}/acceptTermsOfUse"
+      }
+    },
+    "parameters" : {
+      "ThumbnailSize" : {
+        "name" : "size",
+        "in" : "query",
+        "required" : false,
+        "style" : "form",
+        "explode" : true,
+        "schema" : {
+          "type" : "string",
+          "enum" : [ "Original", "Small", "Medium", "Medium1", "Large" ]
+        }
+      },
+      "accountId" : {
+        "name" : "accountId",
+        "in" : "path",
+        "description" : "Your account identifier",
+        "required" : true,
+        "style" : "simple",
+        "explode" : false,
+        "schema" : {
+          "type" : "number",
+          "format" : "integer"
+        }
+      }
+    },
+    "requestBodies" : {
+      "RenewParameters" : {
+        "description" : "Parameters of membership renewal",
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "$ref" : "#/components/schemas/RenewParameters"
+            }
+          }
+        },
+        "required" : true
+      }
+    },
+    "securitySchemes" : {
+      "OAuth2_autorizationCode" : {
+        "type" : "oauth2",
+        "description" : "\nUse this flow to get token by authorization through your organization web site login form.\n\n - Replace YOUR_ORGANIZATION to valid domain name.\n - Allow SSO for your authorized application.\n - Add your web application redirect url to list of trusted domains for that application.\n\n See also `http://gethelp.wildapricot.com/en/articles/200`\n",
+        "flows" : {
+          "authorizationCode" : {
+            "authorizationUrl" : "https://YOUR_ORGANIZATION.wildapricot.org/sys/login",
+            "tokenUrl" : "https://oauth.wildapricot.org/auth/token",
+            "scopes" : {
+              "auto" : "autodetect allowed scopes based on current user permissions"
+            }
+          }
+        }
+      },
+      "OAuth2_password" : {
+        "type" : "oauth2",
+        "description" : "Use this authentication flow to get oauth token by providing user credentials.\nclientId and clientSecret should be taken from Authorized applications page in admin backend.\n\nFor example if your if your emails is admin@yourdomain.com and password is 123456.\nyou should pass\n`username=admin@yourdomain.com&password=12345&&scope=auto`\n",
+        "flows" : {
+          "password" : {
+            "tokenUrl" : "https://oauth.wildapricot.org/auth/token",
+            "scopes" : {
+              "auto" : "autodetect allowed scopes based on current user permissions"
+            }
+          }
+        }
+      }
+    }
+  }
+}

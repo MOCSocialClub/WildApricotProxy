@@ -1,0 +1,49 @@
+<Project Sdk="Dgmjr.NET.Sdk.Web">
+  <PropertyGroup>
+    <Description>WildApricot</Description>
+    <Copyright>WildApricot &amp; Dr. David Gerard</Copyright>
+    <TargetFramework>net8.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PreserveCompilationContext>true</PreserveCompilationContext>
+    <AssemblyName>WildApricotProxyApi</AssemblyName>
+    <PackageId>WildApricotProxyApi</PackageId>
+    <Nullable>enable</Nullable>
+    <NoWarn>$(NoWarn);CS0472;CS8618;CS8981;CS8765;CS8767;CS8625;CS8600;CS8605;CS0109;CS8604;NU1504;CS1570</NoWarn>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <IntermediateOutputPath Condition="'$(IntermediateOutputPath)' == ''">obj/</IntermediateOutputPath>
+    <CompilerGeneratedFilesOutputPath>$(IntermediateOutputPath)generated</CompilerGeneratedFilesOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" VersionOverride="5.1.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" VersionOverride="[6.9.0,)" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" VersionOverride="[6.9.0,)" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" VersionOverride="[6.9.0,)" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" VersionOverride="[6.9.0,)" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" VersionOverride="[6.9.0,)" />
+    <PackageReference Include="Microsoft.Identity.Web" VersionOverride="[3.2.2,)" />
+    <PackageReference Include="Dgmjr.Abstractions" VersionOverride="[0.0.1-Local,)" />
+    <PackageReference Include="Dgmjr.Mime" VersionOverride="[0.0.1-Local,)" />
+    <PackageReference Include="System.Net.Http.Json" VersionOverride="8.0.1" />
+    <PackageReference Include="ThisAssembly" VersionOverride="2.0.5">
+      <IncludeAssets>runtine; build; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="ThisAssembly.Constants" VersionOverride="2.0.5">
+      <IncludeAssets>runtine; build; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="ThisAssembly.AssemblyInfo" VersionOverride="2.0.5">
+      <IncludeAssets>runtine; build; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.4" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Newtonsoft.Json.JsonConverterAttribute" Alias="JsonConverterAttribute" />
+  </ItemGroup>
+  <ItemDefinitionGroup>
+    <PackageReference ExcludeAssets="Native;ContentFiles" />
+  </ItemDefinitionGroup>
+</Project>
